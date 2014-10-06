@@ -1,0 +1,28 @@
+#!@PYTHON@
+# -*- python -*-
+
+import sys, os
+
+# trace:
+def trace (msg) :
+    sys.stderr.write('dokidocize: %s\n' % msg)
+
+# main:
+def main () :
+    trace('hello!')
+    # parse command line
+    assert len(sys.argv) == 2, sys.argv
+    subdir = sys.argv[1]
+    makefile = os.path.join(subdir, 'Makefile.in')
+    trace("generating makefile: '%s'" % makefile)
+    with open(makefile, 'wt') as f :
+        f.write('#\n')
+        f.write('all:\n')
+        f.write('check:\n')
+        f.write('install:\n')
+    # ok
+    trace("all done!")
+
+# exec
+if __name__ == '__main__' :
+    main()
