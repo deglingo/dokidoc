@@ -4,6 +4,7 @@ AM_INIT_AUTOMAKE
 : ${CFLAGS:=-g -O0 -Wall}
 
 AC_SUBST([aclocaldir], ['${datadir}/aclocal'])
+AC_SUBST([scannersdir], ['${pkglibexecdir}/scannersdir'])
 
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -14,13 +15,16 @@ LT_INIT
 AC_PATH_PROG([PYTHON], [python3])
 test x"$PYTHON" != x || AC_ERROR([python3 not found])
 
+PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
 PKG_CHECK_MODULES([CLOG], [clog])
 
 AC_CONFIG_FILES([ \
   Makefile \
   src/Makefile \
   src/dokidoc/Makefile \
+  src/dokidoc-base/Makefile \
   src/dokidoc-scan/Makefile \
+  src/dokidoc-scan/scanner-c/Makefile \
   tools/Makefile \
 ])
 AC_CONFIG_FILES([tools/dokidocize], [chmod +x tools/dokidocize])
