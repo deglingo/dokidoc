@@ -4,6 +4,7 @@ AM_INIT_AUTOMAKE
 : ${CFLAGS:=-g -O0 -Wall}
 
 AC_SUBST([aclocaldir], ['${datadir}/aclocal'])
+AC_SUBST([libdokidocincludedir], ['${includedir}/libdokidoc'])
 AC_SUBST([scannersdir], ['${pkglibexecdir}/scannersdir'])
 
 AC_PROG_CC
@@ -22,6 +23,7 @@ AC_CONFIG_FILES([ \
   Makefile \
   src/Makefile \
   src/dokidoc/Makefile \
+  src/libdokidoc/Makefile \
   src/dokidoc-base/Makefile \
   src/dokidoc-scan/Makefile \
   src/dokidoc-scan/scanner-c/Makefile \

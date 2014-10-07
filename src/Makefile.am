@@ -1,3 +1,3 @@
 #
 
-SUBDIRS = dokidoc dokidoc-base dokidoc-scan
+SUBDIRS = dokidoc libdokidoc dokidoc-base dokidoc-scan

@@ -1,6 +1,7 @@
 /* scanmain.c -
  */
 
+#include "libdokidoc/libdokidoc.h"
 #include "dokidoc-base/dokidoc-sysconf.h"
 
 #include <clog.h>
