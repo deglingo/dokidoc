@@ -1,0 +1,14 @@
+#!@SHELL@
+# -*- shell-script -*-
+
+ARGS=
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --scan) COMMAND='dokidoc-scan'; shift;;
+        --) shift; ARGS="${ARGS} ${@}"; break;;
+        *) ARGS="${ARGS} ${1}"; shift;;
+    esac
+done
+
+echo "dokidoc: $COMMAND $ARGS" >&2
+eval "$COMMAND $ARGS"

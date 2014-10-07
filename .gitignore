@@ -12,3 +12,6 @@ configure
 install-sh
 ltmain.sh
 missing
+depcomp
+docs/dokidoc.dot
+docs/dokidoc.png

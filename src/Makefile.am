@@ -1,0 +1,3 @@
+#
+
+SUBDIRS = dokidoc dokidoc-scan

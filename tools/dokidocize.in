@@ -1,27 +1,195 @@
 #!@PYTHON@
 # -*- python -*-
 
-import sys, os
+import sys, os, getopt, configparser
 
 # trace:
 def trace (msg) :
     sys.stderr.write('dokidocize: %s\n' % msg)
 
+# Config:
+class Config :
+
+    # __init__:
+    def __init__ (self) :
+        self.srcdir = '.'
+        self.cfgfile = ''
+        self.subdir = None
+        self.sources = None
+        
+    # read_file:
+    def read_file (self, fname) :
+        parser = configparser.ConfigParser()
+        with open(fname, 'rt') as f :
+            parser.read_file(f, fname)
+        #
+        self.sources = parser['DEFAULT']['sources'].split()
+
+# Writer:
+class Writer :
+
+    # __init__:
+    def __init__ (self) :
+        self.root = WSection()
+
+    # dump:
+    def dump (self, f) :
+        self.root.dump(f)
+        
+    # section:
+    def section (self, path) :
+        return self.root.section(path)
+
+# WSection:
+class WSection :
+
+    def __init__ (self) :
+        self.nodes = []
+        self.secmap = {}
+
+    def section (self, path) :
+        assert '.' not in path, path # [todo]
+        s = self.secmap.get(path)
+        if s is None :
+            s = WSection()
+            self.nodes.append(s)
+            self.secmap[path] = s
+        return s
+
+    def dump (self, f) :
+        for n in self.nodes :
+            n.dump(f)
+        
+    def subst (self, name) :
+        self.nodes.append(WVar(name, '@%s@' % name))
+
+    def var (self, name, value) :
+        self.nodes.append(WVar(name, value))
+
+    def rule (self, targets, prereqs=None, recipe=None, phony=False) :
+        self.nodes.append(WRule(targets, prereqs, recipe, phony))
+
+# WVar:
+class WVar :
+
+    def __init__ (self, name, value) :
+        self.name = name
+        self.value = value
+
+    def dump (self, f) :
+        f.write('%s = %s\n' % (self.name, self.value))
+
+# WRule:
+class WRule :
+
+    def __init__ (self, targets, prereqs, recipe, phony) :
+        self.targets = self._fixlist(targets)
+        self.prereqs = self._fixlist(prereqs)
+        self.recipe = self._fixlist(recipe)
+        self.phony = phony
+
+    def dump (self, f) :
+        if self.phony :
+            f.write('.PHONY: %s\n' % ' '.join(self.targets))
+        f.write('%s: %s\n' % (' '.join(self.targets), ' '.join(self.prereqs)))
+        for cmd in self.recipe :
+            f.write('\t%s\n' % cmd)
+
+    @staticmethod
+    def _fixlist (arg) :
+        if arg is None : return ()
+        elif isinstance(arg, str) : return (arg,)
+        else : return tuple(arg)
+
 # main:
 def main () :
     trace('hello!')
+    config = Config()
     # parse command line
-    assert len(sys.argv) == 2, sys.argv
-    subdir = sys.argv[1]
-    makefile = os.path.join(subdir, 'Makefile.in')
-    trace("generating makefile: '%s'" % makefile)
-    with open(makefile, 'wt') as f :
-        f.write('#\n')
-        f.write('all:\n')
-        f.write('check:\n')
-        f.write('install:\n')
+    cmd = 'init'
+    shortopts = 'Uc:s:'
+    opts, args = getopt.gnu_getopt(sys.argv[1:], shortopts)
+    for o, a in opts :
+        if o in ('-U',) :
+            cmd = 'update'
+        elif o in ('-c',) :
+            config.cfgfile = a
+        elif o in ('-s',) :
+            config.srcdir = a
+        else :
+            assert 0, (o, a)
+    assert len(args) == 1, args
+    config.subdir = args[0]
+    # read the config file
+    if config.cfgfile :
+        config.read_file(config.cfgfile)
+    # process
+    if cmd == 'init' :
+        generate_dummy_makefile(config)
+    elif cmd == 'update' :
+        generate_makefile(config)
+    else :
+        assert 0, init
     # ok
     trace("all done!")
+
+# _generate_base_makefile:
+def _generate_base_makefile (cfg) :
+    w = Writer()
+    defs = w.section('defs')
+    s = w.section('rules')
+    defs.subst('DOKIDOCIZE')
+    defs.subst('top_srcdir')
+    defs.subst('srcdir')
+    defs.subst('top_builddir')
+    defs.var('subdir', cfg.subdir)
+    defs.rule('all', phony=True)
+    defs.rule('check', phony=True)
+    defs.rule('install', phony=True)
+    defs.rule('Makefile',
+              ('$(srcdir)/Makefile.in', '$(top_builddir)/config.status'),
+              'cd $(top_builddir) && ./config.status --file=$(subdir)/Makefile')
+    s.rule('$(srcdir)/Makefile.in',
+           'dokidoc.conf',
+           '$(DOKIDOCIZE) -U -s $(top_srcdir) -c dokidoc.conf $(subdir)')
+    s.rule('dokidoc.conf',
+           ('$(srcdir)/dokidoc.conf.in', '$(top_builddir)/config.status'),
+           'cd $(top_builddir) && ./config.status --file=$(subdir)/dokidoc.conf')
+    return w
+
+# generate_dummy_makefile:
+def generate_dummy_makefile (cfg) :
+    makefile = os.path.realpath(os.path.join(cfg.srcdir, cfg.subdir, 'Makefile.in'))
+    trace("generating makefile: '%s'" % makefile)
+    w = _generate_base_makefile(cfg)
+    # output
+    # trace('OUTPUT:')
+    # w.dump(sys.stderr)
+    tmpfile = makefile + '.tmp'
+    with open(tmpfile, 'wt') as f :
+        w.dump(f)
+    os.rename(tmpfile, makefile)
+
+# generate_makefile:
+def generate_makefile (cfg) :
+    makefile = os.path.realpath(os.path.join(cfg.srcdir, cfg.subdir, 'Makefile.in'))
+    trace("generating makefile: '%s'" % makefile)
+    w = _generate_base_makefile(cfg)
+    defs = w.section('defs')
+    defs.subst('DOKIDOC')
+    s = w.section('rules')
+    s.rule('dokidoc', 'dokidoc-xml1.stamp-h', phony=True)
+    s.rule('dokidoc-xml1.stamp-h',
+           cfg.sources,
+           ('$(DOKIDOC) --scan dokidoc.conf',
+            'echo >$@'))
+    # output
+    # trace('OUTPUT:')
+    # w.dump(sys.stderr)
+    tmpfile = makefile + '.tmp'
+    with open(tmpfile, 'wt') as f :
+        w.dump(f)
+    os.rename(tmpfile, makefile)
 
 # exec
 if __name__ == '__main__' :
