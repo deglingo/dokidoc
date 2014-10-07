@@ -1,0 +1,75 @@
+#define TOOL_SHAPE box
+#define TOOL_COLOR "cyan"
+
+#define FILE_SHAPE ellipse
+#define INFILE_COLOR "chartreuse"
+#define GENFILE_COLOR "yellow"
+#define OUTFILE_COLOR "limegreen"
+
+digraph G
+{
+    // rankdir = LR;
+
+    // input files
+    {
+        rank = same;
+        node[shape=FILE_SHAPE, style=filled, color=INFILE_COLOR];
+        sources;
+        layout;
+        tmpl;
+    }
+
+    // programs
+    {
+        node[shape=TOOL_SHAPE, style=filled, color=TOOL_COLOR];
+        cscan[shape=box];
+        filterin[shape=box, label="filter -i"];
+        filterout[shape=box, label="filter -o"];
+        mksgml[shape=box];
+        mkhtml[shape=box];
+        mkpdf[shape=box];
+        mkany[shape=box, label="mk*"];
+    }
+
+    // generated files
+    {
+        node[shape=FILE_SHAPE, style=filled, color=GENFILE_COLOR];
+        xml1[shape=ellipse];
+        xml2[shape=ellipse];
+        sgml[shape=ellipse];
+    }
+
+    // output files
+    {
+        rank = same;
+        node[shape=FILE_SHAPE, style=filled, color=OUTFILE_COLOR];
+        html[shape=ellipse];
+        pdf[shape=ellipse];
+        any[shape=ellipse, label="*"];
+    }
+
+    // links
+    sources -> cscan;
+    cscan -> xml1;
+
+    xml1 -> filterin;
+    filterin -> tmpl;
+    tmpl -> filterin;
+
+    // xml1 ->filterout;
+    tmpl ->filterout;
+    filterout -> xml2;
+
+    xml2 -> mksgml;
+    layout -> mksgml;
+    mksgml -> sgml;
+
+    sgml -> mkhtml;
+    mkhtml -> html;
+
+    sgml -> mkpdf;
+    mkpdf -> pdf;
+
+    sgml -> mkany;
+    mkany -> any;
+}
