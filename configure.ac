@@ -10,6 +10,7 @@ AC_SUBST([scannersdir], ['${pkglibexecdir}/scannersdir'])
 AC_PROG_CC
 AM_PROG_CC_C_O
 LT_INIT
+AC_PROG_YACC
 
 
 # [fixme] check for python3

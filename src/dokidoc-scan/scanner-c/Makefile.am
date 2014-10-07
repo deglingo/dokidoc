@@ -10,4 +10,9 @@ dokidoc_scanner_c_la_CFLAGS = \
 dokidoc_scanner_c_la_LDFLAGS = -module
 
 dokidoc_scanner_c_la_SOURCES = \
+	scannercgram.y \
 	scannercmain.c
+
+AM_YFLAGS = -d
+
+BUILT_SOURCES = scannercgram.h

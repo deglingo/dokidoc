@@ -8,4 +8,14 @@
 
 
 
+typedef struct _DokLocation
+{
+  GQuark qfile;
+  gint lineno;
+  gint end_lineno;
+}
+  DokLocation;
+
+
+
 #endif
