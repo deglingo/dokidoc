@@ -5,6 +5,8 @@
 #define _LIBDOKIDOC_H_
 
 
+#include "libdokidoc/dokbase.h"
+
 #include "libdokidoc/dokscanner.h"
 
 

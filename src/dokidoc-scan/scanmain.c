@@ -6,36 +6,9 @@
 
 #include <clog.h>
 #include <glib.h>
-#include <gmodule.h>
 #include <glob.h>
 #include <string.h>
 #include <stdlib.h>
-
-
-
-typedef struct _ScannerClass ScannerClass;
-typedef struct _Scanner Scanner;
-
-typedef void (* ProcessFunc) ( Scanner *scanner,
-                               GError **error );
-
-
-
-struct _ScannerClass
-{
-  gchar *name;
-  gchar *module_path;
-  GModule *module;
-  ProcessFunc process;
-};
-
-
-
-struct _Scanner
-{
-  ScannerClass *cls;
-  gchar *filename;
-};
 
 
 
@@ -71,56 +44,6 @@ static GOptionEntry OPTION_ENTRIES[] =
   {
     { NULL, },
   };
-
-
-
-/* scanner_class_new:
- */
-static ScannerClass *scanner_class_new ( const gchar *name,
-                                         const gchar *module_path )
-{
-  ScannerClass *cls;
-  cls = g_new0(ScannerClass, 1);
-  cls->name = g_strdup(name);
-  cls->module_path = g_strdup(module_path);
-  return cls;
-}
-
-
-
-/* scanner_new:
- */
-static Scanner *scanner_new ( ScannerClass *cls,
-                              gchar *filename )
-{
-  Scanner *scanner;
-  if (!cls->module)
-    {
-      gpointer process;
-      CL_DEBUG("opening module: '%s'", cls->module_path);
-      if (!(cls->module = g_module_open(cls->module_path, G_MODULE_BIND_LOCAL)))
-        CL_ERROR("could not load module!");
-      if (!(g_module_symbol(cls->module, "dokidoc_scanner_process", &process)))
-        CL_ERROR("could not find 'dokidoc_scanner_process' symbol in module");
-      cls->process = process;
-    }
-  scanner = g_new0(Scanner, 1);
-  scanner->cls = cls;
-  scanner->filename = g_strdup(filename);
-  return scanner;
-}
-
-
-
-/* scanner_process:
- */
-static void scanner_process ( Scanner *scanner )
-{
-  GError *error = NULL;
-  scanner->cls->process(scanner, &error);
-  if (error)
-    CL_ERROR("process error: %s", error->message);
-}
 
 
 
@@ -276,13 +199,15 @@ static void parse_config ( Config *config,
 /* _process_file:
  */
 static void _process_file ( Config *config,
-                            ScannerClass *cls,
+                            DokScannerClass *cls,
                             SourceFile *file )
 {
-  Scanner *scanner;
+  DokScanner *scanner;
+  GError *error = NULL;
   CL_DEBUG("pocessing file: '%s'", file->path);
-  scanner = scanner_new(cls, file->path);
-  scanner_process(scanner);
+  scanner = dok_scanner_new(cls);
+  if (!dok_scanner_process(scanner, file->path, &error))
+    CL_ERROR("process error: %s", error->message);
 }
 
 
@@ -309,7 +234,7 @@ int main ( gint argc,
   parse_config(config, argv[1]);
   /* process */
   {
-    ScannerClass *cls = scanner_class_new("C", g_build_filename(DOKIDOC_SCANNERSDIR, "dokidoc-scanner-c.so", NULL));
+    DokScannerClass *cls = dok_scanner_class_new("C", g_build_filename(DOKIDOC_SCANNERSDIR, "dokidoc-scanner-c.so", NULL));
     for (l = config->source_files; l; l = l->next)
       _process_file(config, cls, l->data);
   }
