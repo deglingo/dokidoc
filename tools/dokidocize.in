@@ -23,7 +23,7 @@ class Config :
         with open(fname, 'rt') as f :
             parser.read_file(f, fname)
         #
-        self.sources = parser['DEFAULT']['sources'].split()
+        self.sources = (s.strip() for s in parser['DEFAULT']['sources'].split(','))
 
 # Writer:
 class Writer :

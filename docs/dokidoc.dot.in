@@ -34,8 +34,7 @@ digraph G
     // generated files
     {
         node[shape=FILE_SHAPE, style=filled, color=GENFILE_COLOR];
-        xml1[shape=ellipse];
-        xml2[shape=ellipse];
+        xml[shape=ellipse];
         sgml[shape=ellipse];
     }
 
@@ -50,17 +49,17 @@ digraph G
 
     // links
     sources -> cscan;
-    cscan -> xml1;
+    cscan -> xml;
 
-    xml1 -> filterin;
+    xml -> filterin;
     filterin -> tmpl;
     tmpl -> filterin;
 
     // xml1 ->filterout;
     tmpl ->filterout;
-    filterout -> xml2;
+    filterout -> xml;
 
-    xml2 -> mksgml;
+    xml -> mksgml;
     layout -> mksgml;
     mksgml -> sgml;
 
