@@ -4,7 +4,7 @@
 #include "libdokidoc/libdokidoc.h"
 #include "scannerc.h"
 #include "scannercgram.h"
-#include "lexer.h"
+#include "cpp.h"
 #include <glib.h>
 #include <clog.h>
 #include <stdio.h>
@@ -16,7 +16,7 @@
 typedef struct _DokScannerC
 {
   DokScanner dok_scanner;
-  Lexer *lexer;
+  CPP *cpp;
 }
   DokScannerC;
 
@@ -40,7 +40,7 @@ static void _scanner_process ( DokScanner *scanner,
                                GError **error )
 {
   DokScannerC *cscanner = (DokScannerC *) scanner;
-  cscanner->lexer = lexer_new(filename);
+  cscanner->cpp = cpp_new(filename);
   yyparse(scanner);
 }
 
@@ -66,7 +66,7 @@ int yylex ( DokAST **lvalp,
   /* LexRule *rule; */
   /* for (rule = LEX_RULES;  */
   CL_TRACE("%p", scanner);
-  lexer_lex(((DokScannerC *) scanner)->lexer);
+  cpp_lex(((DokScannerC *) scanner)->cpp);
   return 0;
 }
 
