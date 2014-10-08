@@ -11,6 +11,7 @@ dokidoc_scanner_c_la_LDFLAGS = -module
 
 dokidoc_scanner_c_la_SOURCES = \
 	scannercgram.y \
+	lexer.c \
 	scannercmain.c
 
 AM_YFLAGS = -d
