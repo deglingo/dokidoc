@@ -7,6 +7,8 @@
 
 #include "libdokidoc/dokbase.h"
 
+#include "libdokidoc/dokast.h"
+
 #include "libdokidoc/dokscanner.h"
 
 

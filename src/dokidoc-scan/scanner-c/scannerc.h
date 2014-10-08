@@ -8,8 +8,6 @@
 
 
 
-typedef struct _Node Node;
-
 typedef struct _Loc
 {
   gchar *filename;
@@ -22,7 +20,7 @@ typedef struct _Loc
   Loc;
 
 
-#define YYSTYPE Node *
+#define YYSTYPE DokAST *
 #define YYLTYPE Loc
 
 /* [fixme] how to handle filename ? */
@@ -45,7 +43,7 @@ typedef struct _Loc
   } while (0)
 
 int yyparse ( DokScanner *scanner );
-int yylex ( Node **lvalp,
+int yylex ( DokAST **lvalp,
             Loc *llocp,
             DokScanner *scanner );
 void yyerror ( Loc *locp,

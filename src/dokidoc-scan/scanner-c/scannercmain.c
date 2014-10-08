@@ -93,7 +93,7 @@ void dokidoc_scanner_module_init ( DokScannerFuncs *funcs )
 
 /* yylex:
  */
-int yylex ( Node **lvalp,
+int yylex ( DokAST **lvalp,
             Loc *llocp,
             DokScanner *scanner )
 {
