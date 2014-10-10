@@ -3,15 +3,20 @@
 
 #include "lexer.h"
 #include "scannercgram.h"
+#include "scannerc.h"
 #include <stdio.h>
 
 
 
-/* [fixme] internal tokens */
-enum
+/* LexerState:
+ */
+typedef enum _LexerState
   {
-    TOK_C_COMMENT = 1024,
-  };
+    LEXER_STATE_NORMAL = 0,
+    LEXER_STATE_COMMENT,
+    LEXER_STATE_INCLUDE,
+  }
+  LexerState;
 
 
 
@@ -21,6 +26,7 @@ typedef struct _LexRule
 {
   gint token;
   gchar *pattern;
+  LexerState state;
   GRegex *regex;
 }
   LexRule;
@@ -31,7 +37,39 @@ typedef struct _LexRule
  */
 static LexRule LEX_RULES[] =
   {
+    { TOK_C_COMMENT_START, "^/\\*", },
+    { TOK_C_COMMENT_END, "^([^\\\\]|(\\\\.))*?\\*/", LEXER_STATE_COMMENT, },
+    { TOK_C_COMMENT_CONT, "^([^\\\\]|(\\\\.))*", LEXER_STATE_COMMENT, },
+    { TOK_INCLUDE, "^[ \t]*((\"[^\"]+\")|(<[^>]+>))[ \t]*", LEXER_STATE_INCLUDE, },
+    { TOK_NL, "^\\n", },
+    { TOK_SPACE, "^[ \t]+", },
+    { TOK_SHARP, "^#", },
     { TOK_IDENT, "^[a-zA-Z_][a-zA-Z0-9_]*", },
+    { TOK_INT, "^[0-9]+", },
+    { TOK_STRING, "^\"([^\\\\]|(\\\\.))*\"", },
+    { TOK_ELLIPSIS, "^\\.\\.\\.", },
+    { TOK_ARROW, "^->", },
+    { TOK_NE, "^!=", },
+    { '(', "^\\(", },
+    { ')', "^\\)", },
+    { '{', "^\\{", },
+    { '}', "^\\}", },
+    { '[', "^\\[", },
+    { ']', "^\\]", },
+    { ';', "^;", },
+    { '=', "^=", },
+    { '&', "^&", },
+    { '^', "^\\^", },
+    { '!', "^!", },
+    { '.', "^\\.", },
+    { ',', "^,", },
+    { '+', "^\\+", },
+    { '-', "^-", },
+    { '*', "^\\*", },
+    { '<', "^<", },
+    { '>', "^>", },
+    { '?', "^\\?", },
+    { ':', "^:", },
     { 0, },
   };
 
@@ -45,6 +83,9 @@ struct _Lexer
   FILE *f;
   GString *buffer;
   gsize charno;
+  gboolean in_comment;
+  GString *comment;
+  LexerState state;
 };
 
 
@@ -62,8 +103,57 @@ static void lex_rules_init ( void )
   for (rule = LEX_RULES; rule->token; rule++)
     {
       if (!(rule->regex = g_regex_new(rule->pattern, G_REGEX_OPTIMIZE, 0, &error)))
-        CL_ERROR("regex error: %s", error->message);
+        CL_ERROR("regex error: '%s' - %s", rule->pattern, error->message);
     }  
+}
+
+
+
+/* lex_rule_match:
+ */
+static LexRule *lex_rule_match ( LexerState state,
+                                 const gchar *line,
+                                 gsize len,
+                                 gint *tok_len )
+{
+  LexRule *rule;
+  GMatchInfo *match = NULL;
+  GError *error = NULL;
+  for (rule = LEX_RULES; rule->token; rule++)
+    {
+      if (rule->state != state)
+        continue;
+      if (g_regex_match_full(rule->regex, line, len, 0, 0, &match, &error))
+        {
+          gint start;
+          g_match_info_fetch_pos(match, 0, &start, tok_len);
+          ASSERT(start == 0);
+          g_match_info_free(match);
+          return rule;
+        }
+      else
+        {
+          g_match_info_free(match);
+        }
+    }
+  return NULL;
+}
+
+
+
+/* token_new:
+ */
+static Token *token_new ( gint type,
+                          const gchar *value,
+                          gssize value_len )
+{
+  Token *tok = g_new0(Token, 1);
+  tok->type = type;
+  if (value)
+    tok->value = g_strndup(value, value_len);
+  else
+    tok->value = NULL;
+  return tok;
 }
 
 
@@ -78,6 +168,7 @@ Lexer *lexer_new ( const gchar *filename )
   if (!(lexer->f = fopen(filename, "r")))
     CL_ERROR("could not open file: '%s'", filename);
   lexer->buffer = g_string_new("");
+  lexer->comment = g_string_new("");
   return lexer;
 }
 
@@ -110,6 +201,7 @@ static gboolean _feed_buffer ( Lexer *lexer )
         }
       else if (c == '\n')
         {
+          g_string_append_c(lexer->buffer, '\n');
           return TRUE;
         }
       else if (c == '\\')
@@ -137,13 +229,62 @@ static gboolean _feed_buffer ( Lexer *lexer )
  */
 Token *lexer_lex ( Lexer *lexer )
 {
+  LexRule *rule;
+  gint tok_len;
+  gchar *buf;
+  Token *tok;
   while (1)
     {
       /* feed the line buffer */
       while (lexer->charno >= lexer->buffer->len)
         if (!_feed_buffer(lexer))
-          return NULL;
-      CL_DEBUG("[TODO]");
-      return NULL;
+          {
+            ASSERT(lexer->state == LEXER_STATE_NORMAL);
+            return NULL;
+          }
+      /* match rule */
+      if (!(rule = lex_rule_match(lexer->state,
+                                  lexer->buffer->str + lexer->charno,
+                                  lexer->buffer->len - lexer->charno,
+                                  &tok_len)))
+        {
+          CL_ERROR("no match: `%s' (state=%d)", lexer->buffer->str + lexer->charno, lexer->state);
+        }
+      buf = lexer->buffer->str + lexer->charno;
+      lexer->charno += tok_len;
+      switch (rule->token)
+        {
+        case TOK_C_COMMENT_START:
+          g_string_append_len(lexer->comment, buf, tok_len);
+          lexer->state = LEXER_STATE_COMMENT;
+          continue;
+        case TOK_C_COMMENT_CONT:
+          g_string_append_len(lexer->comment, buf, tok_len);
+          continue;
+        case TOK_C_COMMENT_END:
+          g_string_append_len(lexer->comment, buf, tok_len);
+          tok = token_new(TOK_COMMENT, lexer->comment->str, lexer->comment->len);
+          g_string_truncate(lexer->comment, 0);
+          lexer->state = LEXER_STATE_NORMAL;
+          return tok;
+        default:
+          tok = token_new(rule->token, buf, tok_len);
+          return tok;
+        }
     }
+}
+
+
+
+/* lexer_lex_include:
+ */
+Token *lexer_lex_include ( Lexer *lexer )
+{
+  LexerState state = lexer->state;
+  Token *tok;
+  lexer->state = LEXER_STATE_INCLUDE;
+  tok = lexer_lex(lexer);
+  ASSERT(tok);
+  lexer->state = state;
+  return tok;
 }

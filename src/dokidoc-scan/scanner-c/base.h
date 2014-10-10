@@ -9,4 +9,23 @@
 
 
 
+#define ASSERT(expr) do {                           \
+    if (!(expr)) {                                  \
+      CL_ERROR("ASSERTION FAILED: `" #expr "'");    \
+    }                                               \
+  } while (0)
+typedef struct _Token Token;
+
+
+
+/* Token:
+ */
+struct _Token
+{
+  gint type;
+  gchar *value;
+};
+
+
+
 #endif

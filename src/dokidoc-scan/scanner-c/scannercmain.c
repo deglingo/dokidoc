@@ -22,6 +22,29 @@ typedef struct _DokScannerC
 
 
 
+static GHashTable *keywords = NULL;
+
+struct keyword
+{
+  gint token;
+  gchar *name;
+};
+
+static struct keyword KEYWORDS_LIST[] =
+  {
+    { TOK_STATIC, "static" },
+    { TOK_STRUCT, "struct" },
+    { TOK_UNION, "union" },
+    { TOK_ENUM, "enum" },
+    { TOK_VOID, "void" },
+    { TOK_CONST, "const" },
+    { TOK_INLINE, "inline" },
+    { TOK_TYPEDEF, "typedef" },
+    { 0, },
+  };
+
+
+
 /* _scanner_new:
  */
 static DokScanner *_scanner_new ( void )
@@ -41,7 +64,8 @@ static void _scanner_process ( DokScanner *scanner,
 {
   DokScannerC *cscanner = (DokScannerC *) scanner;
   cscanner->cpp = cpp_new(filename);
-  yyparse(scanner);
+  if (yyparse(scanner) != 0)
+    CL_ERROR("parse failed");
 }
 
 
@@ -51,6 +75,13 @@ static void _scanner_process ( DokScanner *scanner,
 void dokidoc_scanner_module_init ( DokScannerFuncs *funcs )
 {
   CL_DEBUG("SCAN PROCESS...");
+  if (!keywords)
+    {
+      struct keyword *kw;
+      keywords = g_hash_table_new(g_str_hash, g_str_equal);
+      for (kw = KEYWORDS_LIST; kw->token; kw++)
+        g_hash_table_insert(keywords, kw->name, dok_ast_keyword_new(kw->token, kw->name));
+    }
   funcs->scanner_new = _scanner_new;
   funcs->scanner_process = _scanner_process;
 }
@@ -63,11 +94,36 @@ int yylex ( DokAST **lvalp,
             Loc *llocp,
             DokScanner *scanner )
 {
+  Token *tok;
   /* LexRule *rule; */
   /* for (rule = LEX_RULES;  */
-  CL_TRACE("%p", scanner);
-  cpp_lex(((DokScannerC *) scanner)->cpp);
-  return 0;
+  /* CL_TRACE("%p", scanner); */
+  while (1)
+    {
+      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp)))
+        return 0;
+      CL_DEBUG("TOKEN: %d (%s)", tok->type, tok->value);
+      switch (tok->type)
+        {
+        case TOK_COMMENT:
+          CL_DEBUG("[TODO] comment: `%s'", tok->value);
+          continue;
+        case TOK_IDENT:
+          {
+            DokAST *kw;
+            if ((kw = g_hash_table_lookup(keywords, tok->value))) {
+              *lvalp = kw;
+              return kw->keyword.token;
+            } else {
+              *lvalp = dok_ast_ident_new(tok->value);
+              return TOK_IDENT;
+            }
+          }
+        default:
+          *lvalp = NULL;
+          return tok->type;
+        }
+    }
 }
 
 
@@ -78,5 +134,29 @@ void yyerror ( Loc *locp,
                DokScanner *scanner,
                char const *msg )
 {
-  CL_ERROR("parse error: %s", msg);
+  CL_DEBUG("ERROR: %s", msg);
+}
+
+
+
+/* eat_function_body:
+ */
+void eat_function_body ( DokScanner *scanner )
+{
+  Token *tok;
+  gint depth = 1;
+  CL_TRACE("%p", scanner);
+  while (1)
+    {
+      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp)))
+        CL_ERROR("EOF in function body");
+      if (tok->type == '{') {
+        ++depth;
+      } else if (tok->type == '}') {
+        if ((--depth) == 0) {
+          cpp_unlex(((DokScannerC *) scanner)->cpp, tok);
+          return;
+        }
+      }
+    }
 }

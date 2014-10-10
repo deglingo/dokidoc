@@ -8,6 +8,22 @@
 
 
 
+/* [fixme] internal tokens */
+enum
+  {
+    TOK_C_COMMENT_START = 1024,
+    TOK_C_COMMENT_CONT,
+    TOK_C_COMMENT_END,
+    TOK_COMMENT,
+    TOK_INCLUDE,
+    TOK_NL,
+    TOK_SPACE,
+    TOK_SHARP,
+    TOK_ARROW,
+  };
+
+
+
 typedef struct _Loc
 {
   gchar *filename;
@@ -49,6 +65,8 @@ int yylex ( DokAST **lvalp,
 void yyerror ( Loc *locp,
                DokScanner *scanner,
                char const * );
+
+void eat_function_body ( DokScanner *scanner );
 
 
 
