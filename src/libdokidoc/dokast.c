@@ -387,19 +387,6 @@ DokAST *dok_ast_keyword_new ( gint token,
 
 
 
-/* /\* dok_ast_type_spec_new: */
-/*  *\/ */
-/* DokAST *dok_ast_type_spec_new ( DokAST *specifiers, */
-/*                                 DokAST *type_name ) */
-/* { */
-/*   DokAST *node = dok_ast_new(DOK_AST_TYPE_SPEC); */
-/*   node->type_spec.specifiers = specifiers; */
-/*   node->type_spec.type_name = type_name; */
-/*   return node; */
-/* } */
-
-
-
 /* dok_ast_delcarator_new:
  */
 DokAST *dok_ast_declarator_new ( DokAST *ident )

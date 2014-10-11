@@ -14,7 +14,6 @@ typedef DokASTNode DokAST; /* [FIXME] */
 typedef struct _DokASTList DokASTList;
 typedef struct _DokASTIdent DokASTIdent;
 typedef struct _DokASTKeyword DokASTKeyword;
-/* typedef struct _DokASTTypeSpec DokASTTypeSpec; */
 typedef struct _DokASTDeclarator DokASTDeclarator;
 typedef struct _DokASTFuncDeclarator DokASTFuncDeclarator;
 typedef struct _DokASTDecl DokASTDecl;
@@ -39,12 +38,10 @@ enum _DokASTNodeType
     DOK_AST_LIST,
     DOK_AST_IDENT,
     DOK_AST_KEYWORD,
-    /* DOK_AST_TYPE_SPEC, */
     DOK_AST_DECLARATOR,
     DOK_AST_FUNC_DECLARATOR,
     DOK_AST_DECL,
     DOK_AST_PARAM_DECL,
-    /* DOK_AST_PARAM, */
     DOK_AST_FUNC_DECL,
     DOK_AST_FUNC,
     DOK_AST_TYPE,
@@ -53,7 +50,6 @@ enum _DokASTNodeType
     DOK_AST_POINTER,
     DOK_AST_STRUCT,
     DOK_AST_ENUM,
-    /* DOK_AST_DECL, */
 
     DOK_AST_TYPE_COUNT,
   };
@@ -102,17 +98,6 @@ struct _DokASTKeyword
   gint token;
   gchar *name;
 };
-
-
-
-/* /\* DokASTTypeSpec: */
-/*  *\/ */
-/* struct _DokASTTypeSpec */
-/* { */
-/*   DOK_AST_HEADER; */
-/*   DokAST *specifiers; */
-/*   DokAST *type_name; */
-/* }; */
 
 
 
@@ -229,33 +214,6 @@ struct _DokASTEnum
 {
   DokASTType super;
 };
-
-
-
-/* /\* DokASTDecl: */
-/*  *\/ */
-/* struct _DokASTDecl */
-/* { */
-/*   DOK_AST_HEADER; */
-/*   DokAST *type_spec; */
-/*   DokAST *declarator; */
-/* }; */
-
-
-
-/* /\* DokAST: */
-/*  *\/ */
-/* union _DokAST */
-/* { */
-/*   DokASTType type; */
-/*   DokASTList list; */
-/*   DokASTKeyword keyword; */
-/*   DokASTIdent ident; */
-/*   DokASTTypeSpec type_spec; */
-/*   DokASTDeclarator declarator; */
-/*   DokASTParam param; */
-/*   DokASTFunc func; */
-/* }; */
 
 
 
