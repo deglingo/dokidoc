@@ -67,6 +67,11 @@ void yyerror ( Loc *locp,
                char const * );
 
 void eat_function_body ( DokScanner *scanner );
+DokAST *collect_decls ( DokScanner *scanner,
+                        DokAST *type_specs,
+                        DokAST *declarators );
+DokAST *fix_type ( DokAST *type,
+                   DokAST *specs );
 
 
 

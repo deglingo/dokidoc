@@ -8,36 +8,64 @@
 
 
 
-typedef enum _DokASTType DokASTType;
-typedef union _DokAST DokAST;
+typedef enum _DokASTNodeType DokASTNodeType;
+typedef struct _DokASTNode DokASTNode;
+typedef DokASTNode DokAST; /* [FIXME] */
 typedef struct _DokASTList DokASTList;
-typedef struct _DokASTKeyword DokASTKeyword;
 typedef struct _DokASTIdent DokASTIdent;
-typedef struct _DokASTTypeSpec DokASTTypeSpec;
+typedef struct _DokASTKeyword DokASTKeyword;
+/* typedef struct _DokASTTypeSpec DokASTTypeSpec; */
 typedef struct _DokASTDeclarator DokASTDeclarator;
-typedef struct _DokASTParam DokASTParam;
+typedef struct _DokASTFuncDeclarator DokASTFuncDeclarator;
+typedef struct _DokASTDecl DokASTDecl;
+typedef struct _DokASTParamDecl DokASTParamDecl;
+typedef struct _DokASTFuncDecl DokASTFuncDecl;
 typedef struct _DokASTFunc DokASTFunc;
+typedef struct _DokASTType DokASTType;
+typedef struct _DokASTTypeName DokASTTypeName;
+typedef struct _DokASTTypeBuiltin DokASTTypeBuiltin;
+typedef struct _DokASTPointer DokASTPointer;
+typedef struct _DokASTStruct DokASTStruct;
+typedef struct _DokASTEnum DokASTEnum;
 
 
 
-#define DOK_AST_HEADER \
-  DokASTType type
-
-
-
-/* DokASTType:
+/* DokASTNodeType:
  */
-enum _DokASTType
+enum _DokASTNodeType
   {
+    DOK_AST_NONE = 0,
+    DOK_AST_NODE,
     DOK_AST_LIST,
-    DOK_AST_KEYWORD,
     DOK_AST_IDENT,
-    DOK_AST_TYPE_SPEC,
+    DOK_AST_KEYWORD,
+    /* DOK_AST_TYPE_SPEC, */
     DOK_AST_DECLARATOR,
-    DOK_AST_PARAM,
-    DOK_AST_FUNC,
+    DOK_AST_FUNC_DECLARATOR,
     DOK_AST_DECL,
+    DOK_AST_PARAM_DECL,
+    /* DOK_AST_PARAM, */
+    DOK_AST_FUNC_DECL,
+    DOK_AST_FUNC,
+    DOK_AST_TYPE,
+    DOK_AST_TYPE_NAME,
+    DOK_AST_TYPE_BUILTIN,
+    DOK_AST_POINTER,
+    DOK_AST_STRUCT,
+    DOK_AST_ENUM,
+    /* DOK_AST_DECL, */
+
+    DOK_AST_TYPE_COUNT,
   };
+
+
+
+/* DokASTNode:
+ */
+struct _DokASTNode
+{
+  DokASTNodeType type;
+};
 
 
 
@@ -45,21 +73,11 @@ enum _DokASTType
  */
 struct _DokASTList
 {
-  DOK_AST_HEADER;
+  DokASTNode super;
+
   DokAST *item;
   DokAST *next;
   DokAST *prev;
-};
-
-
-
-/* DokASTKeyword:
- */
-struct _DokASTKeyword
-{
-  DOK_AST_HEADER;
-  gint token;
-  gchar *name;
 };
 
 
@@ -68,20 +86,33 @@ struct _DokASTKeyword
  */
 struct _DokASTIdent
 {
-  DOK_AST_HEADER;
+  DokASTNode super;
+
   gchar *name;
 };
 
 
 
-/* DokASTTypeSpec:
+/* DokASTKeyword:
  */
-struct _DokASTTypeSpec
+struct _DokASTKeyword
 {
-  DOK_AST_HEADER;
-  DokAST *specifiers;
-  DokAST *type_name;
+  DokASTNode super; /* [FIXME] Ident ? */
+
+  gint token;
+  gchar *name;
 };
+
+
+
+/* /\* DokASTTypeSpec: */
+/*  *\/ */
+/* struct _DokASTTypeSpec */
+/* { */
+/*   DOK_AST_HEADER; */
+/*   DokAST *specifiers; */
+/*   DokAST *type_name; */
+/* }; */
 
 
 
@@ -89,31 +120,22 @@ struct _DokASTTypeSpec
  */
 struct _DokASTDeclarator
 {
-  DOK_AST_HEADER;
+  DokASTNode super;
+
   DokAST *ident;
-};
-
-
-
-/* DokASTParam:
- */
-struct _DokASTParam
-{
-  DOK_AST_HEADER;
-  DokAST *type_spec;
-  DokAST *declarator;
-};
-
-
-
-/* DokASTFunc:
- */
-struct _DokASTFunc
-{
-  DOK_AST_HEADER;
-  DokAST *type_spec;
-  DokAST *declarator;
+  DokAST *type;
   DokAST *param_list;
+};
+
+
+
+/* DokASTFuncDeclarator:
+ */
+struct _DokASTFuncDeclarator
+{
+  DokASTDeclarator super;
+
+  DokAST *target;
 };
 
 
@@ -122,45 +144,254 @@ struct _DokASTFunc
  */
 struct _DokASTDecl
 {
-  DOK_AST_HEADER;
-  DokAST *type_spec;
-  DokAST *declarator;
+  DokASTNode super;
+
+  DokAST *type;
+  DokAST *ident;
 };
 
 
 
-/* DokAST:
+/* DokASTParamDecl:
  */
-union _DokAST
+struct _DokASTParamDecl
 {
-  DokASTType type;
-  DokASTList list;
-  DokASTKeyword keyword;
-  DokASTIdent ident;
-  DokASTTypeSpec type_spec;
-  DokASTDeclarator declarator;
-  DokASTParam param;
-  DokASTFunc func;
+  DokASTDecl super;
 };
 
 
+
+/* DokASTFuncDecl:
+ */
+struct _DokASTFuncDecl
+{
+  DokASTDecl super;
+
+  DokAST *param_list;
+};
+
+
+
+/* DokASTType:
+ */
+struct _DokASTType
+{
+  DokASTNode super;
+};
+
+
+
+/* DokASTTypeName:
+ */
+struct _DokASTTypeName
+{
+  DokASTType super;
+
+  DokAST *ident;
+};
+
+
+
+/* DokASTTypeBuiltin:
+ */
+struct _DokASTTypeBuiltin
+{
+  DokASTType super;
+
+  /* [fixme] type */
+};
+
+
+
+/* DokASTPointer:
+ */
+struct _DokASTPointer
+{
+  DokASTType super;
+
+  DokAST *target;
+};
+
+
+
+/* DokASTStruct:
+ */
+struct _DokASTStruct
+{
+  DokASTType super;
+};
+
+
+
+/* DokASTEnum:
+ */
+struct _DokASTEnum
+{
+  DokASTType super;
+};
+
+
+
+/* /\* DokASTDecl: */
+/*  *\/ */
+/* struct _DokASTDecl */
+/* { */
+/*   DOK_AST_HEADER; */
+/*   DokAST *type_spec; */
+/*   DokAST *declarator; */
+/* }; */
+
+
+
+/* /\* DokAST: */
+/*  *\/ */
+/* union _DokAST */
+/* { */
+/*   DokASTType type; */
+/*   DokASTList list; */
+/*   DokASTKeyword keyword; */
+/*   DokASTIdent ident; */
+/*   DokASTTypeSpec type_spec; */
+/*   DokASTDeclarator declarator; */
+/*   DokASTParam param; */
+/*   DokASTFunc func; */
+/* }; */
+
+
+
+void _dok_ast_init ( void );
+
+#define DOK_AST_CAST(node, type, s_type) ((s_type *) dok_ast_cast((node), (type)))
+#define DOK_AST_CHECK(node, type) (dok_ast_check((node), (type)))
+
+gboolean dok_ast_type_isa ( DokASTNodeType type1,
+                            DokASTNodeType type2 );
+gpointer dok_ast_cast ( gpointer node,
+                        DokASTNodeType type );
+gboolean dok_ast_check ( gpointer node,
+                         DokASTNodeType type );
+
+gchar *dok_ast_to_string ( DokAST *node );
+
+/* DokASTList */
+#define DOK_AST_LIST(n)    (DOK_AST_CAST((n), DOK_AST_LIST, DokASTList))
+#define DOK_AST_IS_LIST(n) (DOK_AST_CHECK((n), DOK_AST_LIST))
+
+#define DOK_AST_LIST_ITEM(n) (DOK_AST_LIST(n)->item)
+#define DOK_AST_LIST_NEXT(n) (DOK_AST_LIST(n)->next)
+#define DOK_AST_LIST_PREV(n) (DOK_AST_LIST(n)->prev)
 
 DokAST *dok_ast_list_append ( DokAST *list,
                               DokAST *item );
 DokAST *dok_ast_list_prepend ( DokAST *list,
                                DokAST *item );
 DokAST *dok_ast_list_tail ( DokAST *list );
+DokAST *dok_ast_list_merge ( DokAST *list1,
+                             DokAST *list2 );
+
+/* DokASTIdent */
+#define DOK_AST_IDENT(n)    (DOK_AST_CAST((n), DOK_AST_IDENT, DokASTIdent))
+#define DOK_AST_IS_IDENT(n) (DOK_AST_CHECK((n), DOK_AST_IDENT))
+
+#define DOK_AST_IDENT_NAME(n) (DOK_AST_IDENT(n)->name)
+
+DokAST *dok_ast_ident_new ( const gchar *name );
+
+/* DokASTKeyword */
+#define DOK_AST_KEYWORD(n)    (DOK_AST_CAST((n), DOK_AST_KEYWORD, DokASTKeyword))
+#define DOK_AST_IS_KEYWORD(n) (DOK_AST_CHECK((n), DOK_AST_KEYWORD))
+
+#define DOK_AST_KEYWORD_TOKEN(n) (DOK_AST_KEYWORD(n)->token)
+#define DOK_AST_KEYWORD_NAME(n) (DOK_AST_KEYWORD(n)->name)
+
 DokAST *dok_ast_keyword_new ( gint token,
                               const gchar *name );
-DokAST *dok_ast_ident_new ( const gchar *name );
-DokAST *dok_ast_type_spec_new ( DokAST *specifiers,
-                                DokAST *type_name );
+
+/* DokASTDeclarator */
+#define DOK_AST_DECLARATOR(n)    (DOK_AST_CAST((n), DOK_AST_DECLARATOR, DokASTDeclarator))
+#define DOK_AST_IS_DECLARATOR(n) (DOK_AST_CHECK((n), DOK_AST_DECLARATOR))
+
+#define DOK_AST_DECLARATOR_IDENT(n) (DOK_AST_DECLARATOR(n)->ident)
+#define DOK_AST_DECLARATOR_PARAM_LIST(n) (DOK_AST_DECLARATOR(n)->param_list)
+#define DOK_AST_DECLARATOR_TYPE(n) (DOK_AST_DECLARATOR(n)->type)
+
 DokAST *dok_ast_declarator_new ( DokAST *ident );
-DokAST *dok_ast_param_new ( DokAST *type_spec,
-                            DokAST *declarator );
-DokAST *dok_ast_func_new ( DokAST *type_spec,
-                           DokAST *declarator,
-                           DokAST *param_list );
+void dok_ast_declarator_set_param_list ( DokAST *declarator,
+                                         DokAST *param_list );
+void dok_declarator_set_pointer ( DokAST *declarator,
+                                  DokAST *pointer );
+
+/* DokASTFuncDeclarator */
+#define DOK_AST_FUNC_DECLARATOR(n)    (DOK_AST_CAST((n), DOK_AST_FUNC_DECLARATOR, DokASTFuncDeclarator))
+#define DOK_AST_IS_FUNC_DECLARATOR(n) (DOK_AST_CHECK((n), DOK_AST_FUNC_DECLARATOR))
+
+#define DOK_AST_FUNC_DECLARATOR_TARGET(n) (DOK_AST_FUNC_DECLARATOR(n)->target)
+
+DokAST *dok_ast_func_declarator_new ( DokAST *target );
+
+/* DokASTDecl */
+#define DOK_AST_DECL(n)    (DOK_AST_CAST((n), DOK_AST_DECL, DokASTDecl))
+#define DOK_AST_IS_DECL(n) (DOK_AST_CHECK((n), DOK_AST_DECL))
+
+#define DOK_AST_DECL_TYPE(n) (DOK_AST_DECL(n)->type)
+#define DOK_AST_DECL_IDENT(n) (DOK_AST_DECL(n)->ident)
+
+DokAST *dok_ast_decl_new ( DokASTNodeType type,
+                           DokAST *type_spec,
+                           DokAST *declarator );
+
+/* DokASTParamDecl */
+#define DOK_AST_PARAM_DECL(n)    (DOK_AST_CAST((n), DOK_AST_PARAM_DECL, DokASTParamDecl))
+#define DOK_AST_IS_PARAM_DECL(n) (DOK_AST_CHECK((n), DOK_AST_PARAM_DECL))
+
+DokAST *dok_ast_param_decl_new ( DokAST *type_spec,
+                                 DokAST *declarator );
+
+/* DokASTFuncDecl */
+#define DOK_AST_FUNC_DECL(n)    (DOK_AST_CAST((n), DOK_AST_FUNC_DECL, DokASTFuncDecl))
+#define DOK_AST_IS_FUNC_DECL(n) (DOK_AST_CHECK((n), DOK_AST_FUNC_DECL))
+
+DokAST *dok_ast_func_decl_new ( DokAST *type_spec,
+                                DokAST *declarator );
+
+/* DokASTType */
+#define DOK_AST_TYPE(n)    (DOK_AST_CAST((n), DOK_AST_TYPE, DokASTType))
+#define DOK_AST_IS_TYPE(n) (DOK_AST_CHECK((n), DOK_AST_TYPE))
+
+/* DokASTTypeName */
+#define DOK_AST_TYPE_NAME(n)    (DOK_AST_CAST((n), DOK_AST_TYPE_NAME, DokASTTypeName))
+#define DOK_AST_IS_TYPE_NAME(n) (DOK_AST_CHECK((n), DOK_AST_TYPE_NAME))
+
+#define DOK_AST_TYPE_NAME_IDENT(n) (DOK_AST_TYPE_NAME(n)->ident)
+
+DokAST *dok_ast_type_name_new ( DokAST *ident );
+
+/* DokASTTypeBuiltin */
+#define DOK_AST_TYPE_BUILTIN(n)    (DOK_AST_CAST((n), DOK_AST_TYPE_BUILTIN, DokASTTypeBuiltin))
+#define DOK_AST_IS_TYPE_BUILTIN(n) (DOK_AST_CHECK((n), DOK_AST_TYPE_BUILTIN))
+
+DokAST *dok_ast_type_builtin_new ( void );
+
+/* DokASTPointer */
+#define DOK_AST_POINTER(n)    (DOK_AST_CAST((n), DOK_AST_POINTER, DokASTPointer))
+#define DOK_AST_IS_POINTER(n) (DOK_AST_CHECK((n), DOK_AST_POINTER))
+
+#define DOK_AST_POINTER_TARGET(n) (DOK_AST_POINTER(n)->target)
+
+DokAST *dok_ast_pointer_new ( DokAST *target );
+
+/* DokASTStruct */
+#define DOK_AST_STRUCT(n)    (DOK_AST_CAST((n), DOK_AST_STRUCT, DokASTStruct))
+#define DOK_AST_IS_STRUCT(n) (DOK_AST_CHECK((n), DOK_AST_STRUCT))
+
+DokAST *dok_ast_struct_new ( void );
+
+/* DokASTEnum */
+#define DOK_AST_ENUM(n)    (DOK_AST_CAST((n), DOK_AST_ENUM, DokASTEnum))
+#define DOK_AST_IS_ENUM(n) (DOK_AST_CHECK((n), DOK_AST_ENUM))
+
+DokAST *dok_ast_enum_new ( void );
+
 
 
 #endif

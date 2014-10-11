@@ -113,7 +113,7 @@ int yylex ( DokAST **lvalp,
             DokAST *kw;
             if ((kw = g_hash_table_lookup(keywords, tok->value))) {
               *lvalp = kw;
-              return kw->keyword.token;
+              return DOK_AST_KEYWORD_TOKEN(kw);
             } else {
               *lvalp = dok_ast_ident_new(tok->value);
               return TOK_IDENT;
@@ -159,4 +159,46 @@ void eat_function_body ( DokScanner *scanner )
         }
       }
     }
+}
+
+
+
+/* collect_decls:
+ */
+DokAST *collect_decls ( DokScanner *scanner,
+                        DokAST *type,
+                        DokAST *declarators )
+{
+  DokAST *l;
+  CL_DEBUG("COLLECT DECLS:");
+  CL_DEBUG("  TYPE: %s", dok_ast_to_string(type));
+  CL_DEBUG("  DECLARATORS: %s", dok_ast_to_string(declarators));
+  for (l = declarators; l; l = DOK_AST_LIST_NEXT(l))
+    {
+      DokAST *item = DOK_AST_LIST_ITEM(l);
+      CL_DEBUG("    - %s", dok_ast_to_string(item));
+    }
+  CL_DEBUG("[TODO]");
+  return NULL;
+}
+
+
+
+/* fix_type:
+ */
+DokAST *fix_type ( DokAST *type,
+                   DokAST *specs )
+{
+  DokAST *l;
+  ASSERT(DOK_AST_IS_TYPE(type));
+  ASSERT((!specs) || DOK_AST_IS_LIST(specs));
+  CL_DEBUG("FIX_TYPE: %s", dok_ast_to_string(type));
+  CL_DEBUG("SPECS: %s", dok_ast_to_string(specs));
+  for (l = specs; l; l = DOK_AST_LIST_NEXT(l))
+    {
+      DokAST *item = DOK_AST_LIST_ITEM(l);
+      CL_DEBUG(" - %s", dok_ast_to_string(item));
+    }
+  CL_DEBUG("[TODO]");
+  return type;
 }

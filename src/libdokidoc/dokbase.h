@@ -18,4 +18,8 @@ typedef struct _DokLocation
 
 
 
+void libdokidoc_init ( void );
+
+
+
 #endif

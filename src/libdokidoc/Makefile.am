@@ -17,5 +17,6 @@ libdokidocinclude_HEADERS = \
 	dokscanner.h
 
 libdokidoc_la_SOURCES = \
+	dokbase.c \
 	dokast.c \
 	dokscanner.c

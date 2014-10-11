@@ -222,6 +222,7 @@ int main ( gint argc,
   Config *config;
   GList *l;
   CL_DEBUG("hello!");
+  libdokidoc_init();
   /* parse the command line */
   option_context = get_option_context();
   if (!g_option_context_parse(option_context, &argc, &argv, &error))
