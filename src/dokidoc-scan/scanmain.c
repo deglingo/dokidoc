@@ -235,7 +235,14 @@ int main ( gint argc,
   parse_config(config, argv[1]);
   /* process */
   {
-    DokScannerClass *cls = dok_scanner_class_new("C", g_build_filename(DOKIDOC_SCANNERSDIR, "dokidoc-scanner-c.so", NULL));
+    gchar *modpath;
+    { /* [FIXME] */
+      const gchar *moddir;
+      if (!(moddir = g_getenv("DOKIDOC_SCANNERSDIR")))
+        moddir = DOKIDOC_SCANNERSDIR;
+      modpath = g_build_filename(moddir, "dokidoc-scanner-c", NULL);
+    }
+    DokScannerClass *cls = dok_scanner_class_new("C", modpath);
     for (l = config->source_files; l; l = l->next)
       _process_file(config, cls, l->data);
   }

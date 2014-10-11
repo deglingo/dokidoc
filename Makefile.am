@@ -1,6 +1,6 @@
 #
 
-SUBDIRS = src tools
+SUBDIRS = src tools test
 
 aclocal_DATA = dokidoc.m4
 

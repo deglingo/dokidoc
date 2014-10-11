@@ -37,6 +37,7 @@ func_def
 decl
   : decl_specs ';'                   { $$ = collect_decls(scanner, $1, NULL); }
   | decl_specs init_decl_list ';'    { $$ = collect_decls(scanner, $1, $2); }
+  | TOK_TYPEDEF decl_specs declarator ';' { $$ = collect_typedef(scanner, $2, $3); }
   ;
 
 decl_specs
@@ -52,7 +53,6 @@ storage_qual_spec_list
 storage_spec
   : TOK_STATIC
   | TOK_INLINE
-  | TOK_TYPEDEF /* [FIXME] */
   ;
 
 qual_spec

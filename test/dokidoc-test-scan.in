@@ -1,0 +1,11 @@
+#!@SHELL@
+# -*- shell-script -*-
+
+TOP_SRCDIR='@abs_top_srcdir@'
+TOP_BUILDDIR='@abs_top_builddir@'
+
+DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
+
+export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
+
+"$DOKIDOC_SCAN" dokidoc-test-scan.conf

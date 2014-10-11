@@ -29,7 +29,10 @@ AC_CONFIG_FILES([ \
   src/dokidoc-scan/Makefile \
   src/dokidoc-scan/scanner-c/Makefile \
   tools/Makefile \
+  test/Makefile \
 ])
 AC_CONFIG_FILES([tools/dokidocize], [chmod +x tools/dokidocize])
 AC_CONFIG_FILES([src/dokidoc/dokidoc], [chmod +x src/dokidoc/dokidoc])
+AC_CONFIG_FILES([test/dokidoc-test-scan], [chmod +x test/dokidoc-test-scan])
+AC_CONFIG_FILES([test/dokidoc-test-scan.conf])
 AC_OUTPUT

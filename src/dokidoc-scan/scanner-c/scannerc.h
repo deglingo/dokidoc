@@ -70,6 +70,9 @@ void eat_function_body ( DokScanner *scanner );
 DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *type_specs,
                         DokAST *declarators );
+DokAST *collect_typedef ( DokScanner *scanner,
+                          DokAST *type_specs,
+                          DokAST *declarator );
 DokAST *fix_type ( DokAST *type,
                    DokAST *specs );
 

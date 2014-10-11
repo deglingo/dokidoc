@@ -130,6 +130,10 @@ void _dok_ast_init ( void )
     sizeof(DokASTFuncDecl),
     NULL,
   };
+  DokASTTypeInfo tp_var_decl = {
+    sizeof(DokASTVarDecl),
+    NULL,
+  };
   DokASTTypeInfo tp_type = {
     sizeof(DokASTType),
     NULL,
@@ -166,6 +170,7 @@ void _dok_ast_init ( void )
   dok_ast_type_register(DOK_AST_DECL, "Decl", DOK_AST_NODE, &tp_decl);
   dok_ast_type_register(DOK_AST_PARAM_DECL, "ParamDecl", DOK_AST_DECL, &tp_param_decl);
   dok_ast_type_register(DOK_AST_FUNC_DECL, "FuncDecl", DOK_AST_DECL, &tp_func_decl);
+  dok_ast_type_register(DOK_AST_VAR_DECL, "VarDecl", DOK_AST_DECL, &tp_var_decl);
   dok_ast_type_register(DOK_AST_TYPE, "Type", DOK_AST_NODE, &tp_type);
   dok_ast_type_register(DOK_AST_TYPE_NAME, "TypeName", DOK_AST_TYPE, &tp_type_name);
   dok_ast_type_register(DOK_AST_TYPE_BUILTIN, "TypeBuiltin", DOK_AST_TYPE, &tp_type_builtin);
@@ -424,6 +429,33 @@ void dok_declarator_set_pointer ( DokAST *declarator,
 
 
 
+/* dok_ast_declarator_chain_type:
+ */
+DokAST *dok_ast_declarator_chain_type ( DokAST *declarator,
+                                        DokAST *type )
+{
+  DokAST *dtype;
+  ASSERT(DOK_AST_IS_DECLARATOR(declarator));
+  ASSERT(DOK_AST_IS_TYPE(type));
+  if ((dtype = DOK_AST_DECLARATOR_TYPE(declarator)))
+    {
+      ASSERT(DOK_AST_IS_POINTER(dtype));
+      while (DOK_AST_POINTER_TARGET(dtype))
+        {
+          dtype = DOK_AST_POINTER_TARGET(dtype);
+          ASSERT(DOK_AST_IS_POINTER(dtype));
+        }
+      DOK_AST_POINTER(dtype)->target = type;
+      return dtype;
+    }
+  else
+    {
+      return type;
+    }
+}
+
+
+
 /* dok_ast_func_declarator_new:
  */
 DokAST *dok_ast_func_declarator_new ( DokAST *target )
@@ -475,6 +507,20 @@ DokAST *dok_ast_func_decl_new ( DokAST *type_spec,
   DokAST *node;
   node = dok_ast_decl_new(DOK_AST_FUNC_DECL, type_spec, declarator);
   DOK_AST_FUNC_DECL(node)->param_list = DOK_AST_DECLARATOR_PARAM_LIST(declarator);
+  return node;
+}
+
+
+
+/* dok_ast_var_decl_new:
+ */
+DokAST *dok_ast_var_decl_new ( DokAST *type,
+                               DokAST *ident )
+{
+  DokAST *node = dok_ast_new(DOK_AST_VAR_DECL);
+  /* [FIXME] */
+  DOK_AST_DECL(node)->type = type;
+  DOK_AST_DECL(node)->ident = ident;
   return node;
 }
 

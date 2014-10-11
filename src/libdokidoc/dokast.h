@@ -19,6 +19,7 @@ typedef struct _DokASTFuncDeclarator DokASTFuncDeclarator;
 typedef struct _DokASTDecl DokASTDecl;
 typedef struct _DokASTParamDecl DokASTParamDecl;
 typedef struct _DokASTFuncDecl DokASTFuncDecl;
+typedef struct _DokASTVarDecl DokASTVarDecl;
 typedef struct _DokASTFunc DokASTFunc;
 typedef struct _DokASTType DokASTType;
 typedef struct _DokASTTypeName DokASTTypeName;
@@ -43,6 +44,7 @@ enum _DokASTNodeType
     DOK_AST_DECL,
     DOK_AST_PARAM_DECL,
     DOK_AST_FUNC_DECL,
+    DOK_AST_VAR_DECL,
     DOK_AST_FUNC,
     DOK_AST_TYPE,
     DOK_AST_TYPE_NAME,
@@ -153,6 +155,15 @@ struct _DokASTFuncDecl
   DokASTDecl super;
 
   DokAST *param_list;
+};
+
+
+
+/* DokASTVarDecl:
+ */
+struct _DokASTVarDecl
+{
+  DokASTDecl super;
 };
 
 
@@ -278,6 +289,8 @@ void dok_ast_declarator_set_param_list ( DokAST *declarator,
                                          DokAST *param_list );
 void dok_declarator_set_pointer ( DokAST *declarator,
                                   DokAST *pointer );
+DokAST *dok_ast_declarator_chain_type ( DokAST *declarator,
+                                        DokAST *type );
 
 /* DokASTFuncDeclarator */
 #define DOK_AST_FUNC_DECLARATOR(n)    (DOK_AST_CAST((n), DOK_AST_FUNC_DECLARATOR, DokASTFuncDeclarator))
@@ -311,6 +324,13 @@ DokAST *dok_ast_param_decl_new ( DokAST *type_spec,
 
 DokAST *dok_ast_func_decl_new ( DokAST *type_spec,
                                 DokAST *declarator );
+
+/* DokASTVarDecl */
+#define DOK_AST_VAR_DECL(n)    (DOK_AST_CAST((n), DOK_AST_VAR_DECL, DokASTVarDecl))
+#define DOK_AST_IS_VAR_DECL(n) (DOK_AST_CHECK((n), DOK_AST_VAR_DECL))
+
+DokAST *dok_ast_var_decl_new ( DokAST *type,
+                               DokAST *ident );
 
 /* DokASTType */
 #define DOK_AST_TYPE(n)    (DOK_AST_CAST((n), DOK_AST_TYPE, DokASTType))

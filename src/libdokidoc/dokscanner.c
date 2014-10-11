@@ -42,7 +42,7 @@ static void dok_scanner_class_init ( DokScannerClass *cls )
       gpointer initptr;
       DokScannerModuleInitFunc init;
       if (!(cls->module = g_module_open(cls->module_path, G_MODULE_BIND_LOCAL)))
-        CL_ERROR("could not load module '%s'", cls->module_path);
+        CL_ERROR("could not load module '%s' : %s", cls->module_path, g_module_error());
       if (!g_module_symbol(cls->module, "dokidoc_scanner_module_init", &initptr))
         CL_ERROR("could not get symbol 'dokidoc_scanner_module_init'");
       init = initptr;

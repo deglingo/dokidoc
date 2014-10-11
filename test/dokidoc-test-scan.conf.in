@@ -1,0 +1,5 @@
+#
+[DEFAULT]
+
+source_bases = @top_srcdir@/test
+sources = @top_srcdir@/test/source1.h

@@ -170,14 +170,33 @@ DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *declarators )
 {
   DokAST *l;
+  DokAST *decl_list = NULL;
   CL_DEBUG("COLLECT DECLS:");
   CL_DEBUG("  TYPE: %s", dok_ast_to_string(type));
   CL_DEBUG("  DECLARATORS: %s", dok_ast_to_string(declarators));
   for (l = declarators; l; l = DOK_AST_LIST_NEXT(l))
     {
       DokAST *item = DOK_AST_LIST_ITEM(l);
+      DokAST *item_type, *ident;
       CL_DEBUG("    - %s", dok_ast_to_string(item));
+      item_type = dok_ast_declarator_chain_type(item, type);
+      ident = DOK_AST_DECLARATOR_IDENT(item);
+      decl_list = dok_ast_list_append(decl_list, dok_ast_var_decl_new(item_type, ident));
     }
+  return decl_list;
+}
+
+
+
+/* collect_typedef:
+ */
+DokAST *collect_typedef ( DokScanner *scanner,
+                          DokAST *type,
+                          DokAST *declarator )
+{
+  CL_DEBUG("COLLECT TYPEDEF:");
+  CL_DEBUG("  TYPE: %s", dok_ast_to_string(type));
+  CL_DEBUG("  DECLARATOR: %s", dok_ast_to_string(declarator));
   CL_DEBUG("[TODO]");
   return NULL;
 }
