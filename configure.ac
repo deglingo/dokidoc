@@ -20,6 +20,13 @@ test x"$PYTHON" != x || AC_ERROR([python3 not found])
 PKG_CHECK_MODULES([GMODULE], [gmodule-2.0])
 PKG_CHECK_MODULES([CLOG], [clog])
 
+# libxml
+AC_SUBST([LIBXML_CFLAGS])
+AC_SUBST([LIBXML_LIBS])
+AC_PATH_PROG([XML_CONFIG], [xml2-config])
+LIBXML_CFLAGS=`$XML_CONFIG --cflags`
+LIBXML_LIBS=`$XML_CONFIG --libs`
+
 AC_CONFIG_FILES([ \
   Makefile \
   src/Makefile \

@@ -203,11 +203,20 @@ static void _process_file ( Config *config,
                             SourceFile *file )
 {
   DokScanner *scanner;
+  DokTree *dok_tree;
+  xmlDocPtr xmldoc;
   GError *error = NULL;
   CL_DEBUG("pocessing file: '%s'", file->path);
   scanner = dok_scanner_new(cls);
   if (!dok_scanner_process(scanner, file->path, &error))
     CL_ERROR("process error: %s", error->message);
+  dok_tree = dok_tree_new();
+  CL_TRACE("tree=%p, type=%d", dok_tree, dok_tree->tree_type);
+  dok_scanner_get_tree(scanner, dok_tree);
+  CL_DEBUG("TREE DUMP:");
+  xmldoc = dok_tree_dump(dok_tree);
+  CL_DEBUG("[TODO] xmldoc: %p", xmldoc);
+  xmlDocDump(stderr, xmldoc);
 }
 
 
@@ -246,5 +255,6 @@ int main ( gint argc,
     for (l = config->source_files; l; l = l->next)
       _process_file(config, cls, l->data);
   }
+
   return 0;
 }

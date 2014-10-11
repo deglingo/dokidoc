@@ -5,6 +5,7 @@
 #define _DOKBASE_H_
 
 #include <glib.h>
+#include <stdio.h>
 
 
 

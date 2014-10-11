@@ -83,3 +83,13 @@ gboolean dok_scanner_process ( DokScanner *scanner,
       return TRUE;
     }
 }
+
+
+
+/* dok_scanner_get_tree:
+ */
+void dok_scanner_get_tree ( DokScanner *scanner,
+                            DokTree *tree )
+{
+  scanner->cls->funcs.scanner_get_tree(scanner, tree);
+}

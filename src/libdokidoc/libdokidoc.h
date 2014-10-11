@@ -11,5 +11,7 @@
 
 #include "libdokidoc/dokscanner.h"
 
+#include "libdokidoc/doktree.h"
+
 
 #endif

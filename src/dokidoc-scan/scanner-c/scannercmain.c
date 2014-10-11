@@ -17,6 +17,7 @@ typedef struct _DokScannerC
 {
   DokScanner dok_scanner;
   CPP *cpp;
+  GPtrArray *decls;
 }
   DokScannerC;
 
@@ -51,6 +52,7 @@ static DokScanner *_scanner_new ( void )
 {
   DokScannerC *scanner;
   scanner = g_new0(DokScannerC, 1);
+  scanner->decls = g_ptr_array_new();
   return (DokScanner *) scanner;
 }
 
@@ -70,6 +72,49 @@ static void _scanner_process ( DokScanner *scanner,
 
 
 
+static DokTree *_make_dok_tree_type ( DokAST *type )
+{
+  if (DOK_AST_IS_TYPE_NAME(type))
+    {
+      DokAST *ident = DOK_AST_TYPE_NAME_IDENT(type);
+      return dok_tree_new_type_name(DOK_AST_IDENT_NAME(ident));
+    }
+  else
+    {
+      CL_ERROR("[TODO] %s", dok_ast_to_string(type));
+      return NULL;
+    }
+}
+
+
+
+/* _scanner_get_tree:
+ */
+static void _scanner_get_tree ( DokScanner *scanner,
+                                DokTree *tree )
+{
+  guint d;
+  DokScannerC *cscanner = (DokScannerC *) scanner;
+  for (d = 0; d < cscanner->decls->len; d++)
+    {
+      DokAST *decl = cscanner->decls->pdata[d];
+      DokAST *ident = DOK_AST_DECL_IDENT(decl);
+      const gchar *name = ident ? DOK_AST_IDENT_NAME(ident) : "??";
+      if (DOK_AST_IS_VAR_DECL(decl))
+        {
+          DokTree *type = _make_dok_tree_type(DOK_AST_DECL_TYPE(decl));
+          DokTree *var = dok_tree_new_var(name, type);
+          dok_tree_add_decl(tree, var);
+        }
+      else
+        {
+          CL_ERROR("[TODO] %s", dok_ast_to_string(decl));
+        }
+    }
+}
+
+
+
 /* dokidoc_scanner_module_init:
  */
 void dokidoc_scanner_module_init ( DokScannerFuncs *funcs )
@@ -84,6 +129,7 @@ void dokidoc_scanner_module_init ( DokScannerFuncs *funcs )
     }
   funcs->scanner_new = _scanner_new;
   funcs->scanner_process = _scanner_process;
+  funcs->scanner_get_tree = _scanner_get_tree;
 }
 
 
@@ -169,6 +215,7 @@ DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *type,
                         DokAST *declarators )
 {
+  DokScannerC *cscanner = (DokScannerC *) scanner;
   DokAST *l;
   DokAST *decl_list = NULL;
   CL_DEBUG("COLLECT DECLS:");
@@ -177,11 +224,13 @@ DokAST *collect_decls ( DokScanner *scanner,
   for (l = declarators; l; l = DOK_AST_LIST_NEXT(l))
     {
       DokAST *item = DOK_AST_LIST_ITEM(l);
-      DokAST *item_type, *ident;
+      DokAST *item_type, *ident, *decl;
       CL_DEBUG("    - %s", dok_ast_to_string(item));
       item_type = dok_ast_declarator_chain_type(item, type);
       ident = DOK_AST_DECLARATOR_IDENT(item);
-      decl_list = dok_ast_list_append(decl_list, dok_ast_var_decl_new(item_type, ident));
+      decl = dok_ast_var_decl_new(item_type, ident);
+      decl_list = dok_ast_list_append(decl_list, decl);
+      g_ptr_array_add(cscanner->decls, decl);
     }
   return decl_list;
 }
