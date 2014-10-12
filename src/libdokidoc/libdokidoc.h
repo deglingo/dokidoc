@@ -9,6 +9,12 @@
 
 #include "libdokidoc/dokast.h"
 
+#include "libdokidoc/dokastvisitor.h"
+
+#include "libdokidoc/dokastdumper.h"
+
+#include "libdokidoc/dokastprocessor.h"
+
 #include "libdokidoc/dokscanner.h"
 
 #include "libdokidoc/doktree.h"

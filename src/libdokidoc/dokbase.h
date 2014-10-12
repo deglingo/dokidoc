@@ -7,6 +7,8 @@
 #include <glib.h>
 #include <stdio.h>
 
+#include <libxml/tree.h>
+
 
 
 typedef struct _DokLocation

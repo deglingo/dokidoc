@@ -5,7 +5,7 @@
 #define _DOKSCANNER_H_
 
 #include "libdokidoc/dokbase.h"
-#include "libdokidoc/doktree.h"
+#include "libdokidoc/dokast.h"
 
 
 
@@ -15,11 +15,9 @@ typedef struct _DokScannerFuncs DokScannerFuncs;
 
 typedef void (* DokScannerModuleInitFunc) ( DokScannerFuncs *funcs );
 typedef DokScanner * (* DokScannerNewFunc) ( void );
-typedef void (* DokScannerProcessFunc) ( DokScanner *scanner,
-                                         const gchar *filename,
-                                         GError **error );
-typedef void (*DokScannerGetTreeFunc) ( DokScanner *scanner,
-                                        DokTree *tree );
+typedef DokAST * (* DokScannerProcessFunc) ( DokScanner *scanner,
+                                             const gchar *filename,
+                                             GError **error );
 
 
 
@@ -38,7 +36,6 @@ struct _DokScannerFuncs
 {
   DokScannerNewFunc scanner_new;
   DokScannerProcessFunc scanner_process;
-  DokScannerGetTreeFunc scanner_get_tree;
 };
 
 
@@ -46,11 +43,9 @@ struct _DokScannerFuncs
 DokScannerClass *dok_scanner_class_new ( const gchar *name,
                                          const gchar *module_path );
 DokScanner *dok_scanner_new ( DokScannerClass *cls );
-gboolean dok_scanner_process ( DokScanner *scanner,
-                               const gchar *filename,
-                               GError **error );
-void dok_scanner_get_tree ( DokScanner *scanner,
-                            DokTree *tree );
+DokAST *dok_scanner_process ( DokScanner *scanner,
+                              const gchar *filename,
+                              GError **error );
 
 
 

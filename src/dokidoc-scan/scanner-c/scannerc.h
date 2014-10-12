@@ -75,6 +75,8 @@ DokAST *collect_typedef ( DokScanner *scanner,
                           DokAST *declarator );
 DokAST *fix_type ( DokAST *type,
                    DokAST *specs );
+void add_decls ( DokScanner *scanner,
+                 DokAST *decls );
 
 
 

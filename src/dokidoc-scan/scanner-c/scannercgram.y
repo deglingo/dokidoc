@@ -21,8 +21,13 @@
 %%
 
 input
-  : /* empty */       { $$ = NULL; }
-  | ext_decl input    { $$ = dok_ast_list_merge($1, $2); }
+  : /* empty */
+  | unit           { add_decls(scanner, $1); }
+  ;
+
+unit
+  : ext_decl          { $$ = $1; }
+  | ext_decl unit     { $$ = dok_ast_list_merge($1, $2); }
 ;
 
 ext_decl

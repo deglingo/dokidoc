@@ -1,4 +1,5 @@
 /* source1.h
  */
 
-int variable;
+int var1;
+int *var2;

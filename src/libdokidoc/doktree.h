@@ -6,8 +6,6 @@
 
 #include "libdokidoc/dokbase.h"
 
-#include <libxml/tree.h>
-
 
 
 typedef enum _DokTreeType DokTreeType;

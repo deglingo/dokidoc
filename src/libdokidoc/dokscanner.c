@@ -1,8 +1,8 @@
 /* dokscanner.c -
  */
 
+#include "libdokidoc/private.h"
 #include "libdokidoc/dokscanner.h"
-#include <clog.h>
 #include <gmodule.h>
 
 
@@ -67,29 +67,22 @@ DokScanner *dok_scanner_new ( DokScannerClass *cls )
 
 /* dok_scanner_process:
  */
-gboolean dok_scanner_process ( DokScanner *scanner,
-                               const gchar *filename,
-                               GError **error )
+DokAST *dok_scanner_process ( DokScanner *scanner,
+                              const gchar *filename,
+                              GError **error )
 {
   GError *tmperr = NULL;
-  scanner->cls->funcs.scanner_process(scanner, filename, &tmperr);
-  if (tmperr)
+  DokAST *ast;
+  ast = scanner->cls->funcs.scanner_process(scanner, filename, &tmperr);
+  if (ast)
     {
-      g_propagate_error(error, tmperr);
-      return FALSE;
+      ASSERT(!tmperr);
+      return ast;
     }
   else
     {
-      return TRUE;
+      ASSERT(tmperr);
+      g_propagate_error(error, tmperr);
+      return NULL;
     }
-}
-
-
-
-/* dok_scanner_get_tree:
- */
-void dok_scanner_get_tree ( DokScanner *scanner,
-                            DokTree *tree )
-{
-  scanner->cls->funcs.scanner_get_tree(scanner, tree);
 }

@@ -6,6 +6,8 @@
 
 #include "libdokidoc/dokbase.h"
 
+struct _DokASTVisitor;
+
 
 
 typedef enum _DokASTNodeType DokASTNodeType;
@@ -14,6 +16,7 @@ typedef DokASTNode DokAST; /* [FIXME] */
 typedef struct _DokASTList DokASTList;
 typedef struct _DokASTIdent DokASTIdent;
 typedef struct _DokASTKeyword DokASTKeyword;
+typedef struct _DokASTUnit DokASTUnit;
 typedef struct _DokASTDeclarator DokASTDeclarator;
 typedef struct _DokASTFuncDeclarator DokASTFuncDeclarator;
 typedef struct _DokASTDecl DokASTDecl;
@@ -38,6 +41,7 @@ enum _DokASTNodeType
     DOK_AST_NODE,
     DOK_AST_LIST,
     DOK_AST_IDENT,
+    DOK_AST_UNIT,
     DOK_AST_KEYWORD,
     DOK_AST_DECLARATOR,
     DOK_AST_FUNC_DECLARATOR,
@@ -99,6 +103,17 @@ struct _DokASTKeyword
 
   gint token;
   gchar *name;
+};
+
+
+
+/* DokASTUnit:
+ */
+struct _DokASTUnit
+{
+  DokASTNode super;
+
+  DokAST *decls;
 };
 
 
@@ -276,6 +291,16 @@ DokAST *dok_ast_ident_new ( const gchar *name );
 DokAST *dok_ast_keyword_new ( gint token,
                               const gchar *name );
 
+/* DokASTUnit */
+#define DOK_AST_UNIT(n)    (DOK_AST_CAST((n), DOK_AST_UNIT, DokASTUnit))
+#define DOK_AST_IS_UNIT(n) (DOK_AST_CHECK((n), DOK_AST_UNIT))
+
+#define DOK_AST_UNIT_DECLS(n) (DOK_AST_UNIT(n)->decls)
+
+DokAST *dok_ast_unit_new ( void );
+void dok_ast_unit_add_decls ( DokAST *unit,
+                              DokAST *decls );
+
 /* DokASTDeclarator */
 #define DOK_AST_DECLARATOR(n)    (DOK_AST_CAST((n), DOK_AST_DECLARATOR, DokASTDeclarator))
 #define DOK_AST_IS_DECLARATOR(n) (DOK_AST_CHECK((n), DOK_AST_DECLARATOR))
@@ -306,6 +331,7 @@ DokAST *dok_ast_func_declarator_new ( DokAST *target );
 
 #define DOK_AST_DECL_TYPE(n) (DOK_AST_DECL(n)->type)
 #define DOK_AST_DECL_IDENT(n) (DOK_AST_DECL(n)->ident)
+#define DOK_AST_DECL_NAME(n) (DOK_AST_DECL_IDENT(n) ? DOK_AST_IDENT_NAME(DOK_AST_DECL_IDENT(n)) : "??")
 
 DokAST *dok_ast_decl_new ( DokASTNodeType type,
                            DokAST *type_spec,
@@ -341,6 +367,7 @@ DokAST *dok_ast_var_decl_new ( DokAST *type,
 #define DOK_AST_IS_TYPE_NAME(n) (DOK_AST_CHECK((n), DOK_AST_TYPE_NAME))
 
 #define DOK_AST_TYPE_NAME_IDENT(n) (DOK_AST_TYPE_NAME(n)->ident)
+#define DOK_AST_TYPE_NAME_NAME(n) (DOK_AST_IDENT_NAME(DOK_AST_TYPE_NAME_IDENT(n)))
 
 DokAST *dok_ast_type_name_new ( DokAST *ident );
 

@@ -9,3 +9,5 @@ DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
 export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
 
 "$DOKIDOC_SCAN" dokidoc-test-scan.conf
+
+# "$DOKIDOC_FILTER" -i source1.xml

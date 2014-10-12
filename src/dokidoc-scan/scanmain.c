@@ -203,20 +203,31 @@ static void _process_file ( Config *config,
                             SourceFile *file )
 {
   DokScanner *scanner;
-  DokTree *dok_tree;
+  xmlNodePtr xmlnode;
   xmlDocPtr xmldoc;
+  DokVisitor *visitor;
+  DokAST *ast;
   GError *error = NULL;
   CL_DEBUG("pocessing file: '%s'", file->path);
   scanner = dok_scanner_new(cls);
-  if (!dok_scanner_process(scanner, file->path, &error))
+  if (!(ast = dok_scanner_process(scanner, file->path, &error)))
     CL_ERROR("process error: %s", error->message);
-  dok_tree = dok_tree_new();
-  CL_TRACE("tree=%p, type=%d", dok_tree, dok_tree->tree_type);
-  dok_scanner_get_tree(scanner, dok_tree);
-  CL_DEBUG("TREE DUMP:");
-  xmldoc = dok_tree_dump(dok_tree);
-  CL_DEBUG("[TODO] xmldoc: %p", xmldoc);
-  xmlDocDump(stderr, xmldoc);
+  xmlnode = xmlNewNode(NULL, BAD_CAST "root");
+  /* dump */
+  {
+    DokVisitor *dumper = dok_ast_dumper_new(stderr);
+    CL_DEBUG("AST DUMP:");
+    dok_visitor_visit(dumper, ast);
+  }
+  /* process */
+  CL_DEBUG("AST PROCESS...");
+  visitor = dok_ast_processor_new();
+  dok_visitor_visit(visitor, ast);
+  /* xmlnode = dok_ast_processor_get_root(visitor); */
+  /* xmldoc = xmlNewDoc(BAD_CAST "1.0"); */
+  /* xmlDocSetRootElement(xmldoc, xmlnode); */
+  /* CL_DEBUG("[TODO] xmldoc: %p", xmldoc); */
+  /* xmlDocDump(stderr, xmldoc); */
 }
 
 

@@ -15,11 +15,19 @@ include_HEADERS = \
 libdokidocinclude_HEADERS = \
 	dokbase.h \
 	dokast.h \
+	dokvisitor.h \
+	dokastvisitor.h \
+	dokastdumper.h \
+	dokastprocessor.h \
 	dokscanner.h \
 	doktree.h
 
 libdokidoc_la_SOURCES = \
 	dokbase.c \
 	dokast.c \
+	dokvisitor.c \
+	dokastvisitor.c \
+	dokastdumper.c \
+	dokastprocessor.c \
 	dokscanner.c \
 	doktree.c

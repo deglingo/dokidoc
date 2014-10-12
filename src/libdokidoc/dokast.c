@@ -1,17 +1,11 @@
 /* dokast.c -
  */
 
+#include "libdokidoc/private.h"
 #include "libdokidoc/dokast.h"
+#include "libdokidoc/dokastvisitor.h"
 #include <clog.h>
 #include <string.h>
-
-
-
-#define ASSERT(expr) do {                           \
-    if (!(expr)) {                                  \
-      CL_ERROR("ASSERTION FAILED: `" #expr "'");    \
-    }                                               \
-  } while (0)
 
 
 
@@ -101,61 +95,81 @@ void _dok_ast_init ( void )
   DokASTTypeInfo tp_list = {
     sizeof(DokASTList),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_ident = {
     sizeof(DokASTIdent),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_keyword = {
     sizeof(DokASTKeyword),
     NULL,
+    NULL,
+  };
+  DokASTTypeInfo tp_unit = {
+    sizeof(DokASTUnit),
+    NULL,
+    NULL,
   };
   DokASTTypeInfo tp_declarator = {
     sizeof(DokASTDeclarator),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_func_declarator = {
     sizeof(DokASTFuncDeclarator),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_decl = {
     sizeof(DokASTDecl),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_param_decl = {
     sizeof(DokASTParamDecl),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_func_decl = {
     sizeof(DokASTFuncDecl),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_var_decl = {
     sizeof(DokASTVarDecl),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_type = {
     sizeof(DokASTType),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_type_name = {
     sizeof(DokASTTypeName),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_type_builtin = {
     sizeof(DokASTTypeBuiltin),
+    NULL,
     NULL,
   };
   DokASTTypeInfo tp_pointer = {
     sizeof(DokASTPointer),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_struct = {
     sizeof(DokASTStruct),
     NULL,
+    NULL,
   };
   DokASTTypeInfo tp_enum = {
     sizeof(DokASTEnum),
+    NULL,
     NULL,
   };
   ident_cache = g_hash_table_new(g_str_hash, g_str_equal);
@@ -165,6 +179,7 @@ void _dok_ast_init ( void )
   dok_ast_type_register(DOK_AST_LIST, "List", DOK_AST_NODE, &tp_list);
   dok_ast_type_register(DOK_AST_IDENT, "Ident", DOK_AST_NODE, &tp_ident);
   dok_ast_type_register(DOK_AST_KEYWORD, "Keyword", DOK_AST_NODE, &tp_keyword);
+  dok_ast_type_register(DOK_AST_UNIT, "Unit", DOK_AST_NODE, &tp_unit);
   dok_ast_type_register(DOK_AST_DECLARATOR, "Declarator", DOK_AST_NODE, &tp_declarator);
   dok_ast_type_register(DOK_AST_FUNC_DECLARATOR, "FuncDeclarator", DOK_AST_DECLARATOR, &tp_func_declarator);
   dok_ast_type_register(DOK_AST_DECL, "Decl", DOK_AST_NODE, &tp_decl);
@@ -388,6 +403,28 @@ DokAST *dok_ast_keyword_new ( gint token,
   DOK_AST_KEYWORD(kw)->token = token;
   DOK_AST_KEYWORD(kw)->name = g_strdup(name);
   return kw;
+}
+
+
+
+/* dok_ast_unit_new:
+ */
+DokAST *dok_ast_unit_new ( void )
+{
+  DokAST *node = dok_ast_new(DOK_AST_UNIT);
+  return node;
+}
+
+
+
+/* dok_ast_unit_add_decls:
+ */
+void dok_ast_unit_add_decls ( DokAST *unit,
+                              DokAST *decls )
+{
+  ASSERT(DOK_AST_IS_UNIT(unit));
+  ASSERT(DOK_AST_IS_LIST(decls));
+  DOK_AST_UNIT(unit)->decls = dok_ast_list_merge(DOK_AST_UNIT_DECLS(unit), decls);
 }
 
 
