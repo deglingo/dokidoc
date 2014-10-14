@@ -17,7 +17,7 @@ typedef struct _DokScannerC
 {
   DokScanner dok_scanner;
   CPP *cpp;
-  DokAST *unit;
+  DokAST *namespace;
 }
   DokScannerC;
 
@@ -52,7 +52,7 @@ static DokScanner *_scanner_new ( void )
 {
   DokScannerC *scanner;
   scanner = g_new0(DokScannerC, 1);
-  scanner->unit = dok_ast_unit_new();
+  scanner->namespace = dok_ast_namespace_new();
   return (DokScanner *) scanner;
 }
 
@@ -68,7 +68,7 @@ static DokAST *_scanner_process ( DokScanner *scanner,
   cscanner->cpp = cpp_new(filename);
   if (yyparse(scanner) != 0)
     CL_ERROR("parse failed");
-  return cscanner->unit;
+  return cscanner->namespace;
 }
 
 
@@ -233,5 +233,5 @@ DokAST *fix_type ( DokAST *type,
 void add_decls ( DokScanner *scanner,
                  DokAST *decls )
 {
-  dok_ast_unit_add_decls(((DokScannerC *) scanner)->unit, decls);
+  dok_ast_namespace_add_decls(((DokScannerC *) scanner)->namespace, decls);
 }

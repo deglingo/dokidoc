@@ -107,8 +107,8 @@ void _dok_ast_init ( void )
     NULL,
     NULL,
   };
-  DokASTTypeInfo tp_unit = {
-    sizeof(DokASTUnit),
+  DokASTTypeInfo tp_namespace = {
+    sizeof(DokASTNamespace),
     NULL,
     NULL,
   };
@@ -179,10 +179,10 @@ void _dok_ast_init ( void )
   dok_ast_type_register(DOK_AST_LIST, "List", DOK_AST_NODE, &tp_list);
   dok_ast_type_register(DOK_AST_IDENT, "Ident", DOK_AST_NODE, &tp_ident);
   dok_ast_type_register(DOK_AST_KEYWORD, "Keyword", DOK_AST_NODE, &tp_keyword);
-  dok_ast_type_register(DOK_AST_UNIT, "Unit", DOK_AST_NODE, &tp_unit);
   dok_ast_type_register(DOK_AST_DECLARATOR, "Declarator", DOK_AST_NODE, &tp_declarator);
   dok_ast_type_register(DOK_AST_FUNC_DECLARATOR, "FuncDeclarator", DOK_AST_DECLARATOR, &tp_func_declarator);
   dok_ast_type_register(DOK_AST_DECL, "Decl", DOK_AST_NODE, &tp_decl);
+  dok_ast_type_register(DOK_AST_NAMESPACE, "Namespace", DOK_AST_DECL, &tp_namespace);
   dok_ast_type_register(DOK_AST_PARAM_DECL, "ParamDecl", DOK_AST_DECL, &tp_param_decl);
   dok_ast_type_register(DOK_AST_FUNC_DECL, "FuncDecl", DOK_AST_DECL, &tp_func_decl);
   dok_ast_type_register(DOK_AST_VAR_DECL, "VarDecl", DOK_AST_DECL, &tp_var_decl);
@@ -407,24 +407,24 @@ DokAST *dok_ast_keyword_new ( gint token,
 
 
 
-/* dok_ast_unit_new:
+/* dok_ast_namespace_new:
  */
-DokAST *dok_ast_unit_new ( void )
+DokAST *dok_ast_namespace_new ( void )
 {
-  DokAST *node = dok_ast_new(DOK_AST_UNIT);
+  DokAST *node = dok_ast_new(DOK_AST_NAMESPACE);
   return node;
 }
 
 
 
-/* dok_ast_unit_add_decls:
+/* dok_ast_namespace_add_decls:
  */
-void dok_ast_unit_add_decls ( DokAST *unit,
-                              DokAST *decls )
+void dok_ast_namespace_add_decls ( DokAST *namespace,
+                                   DokAST *decls )
 {
-  ASSERT(DOK_AST_IS_UNIT(unit));
+  ASSERT(DOK_AST_IS_NAMESPACE(namespace));
   ASSERT(DOK_AST_IS_LIST(decls));
-  DOK_AST_UNIT(unit)->decls = dok_ast_list_merge(DOK_AST_UNIT_DECLS(unit), decls);
+  DOK_AST_NAMESPACE(namespace)->decls = dok_ast_list_merge(DOK_AST_NAMESPACE_DECLS(namespace), decls);
 }
 
 

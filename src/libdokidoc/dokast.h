@@ -16,7 +16,7 @@ typedef DokASTNode DokAST; /* [FIXME] */
 typedef struct _DokASTList DokASTList;
 typedef struct _DokASTIdent DokASTIdent;
 typedef struct _DokASTKeyword DokASTKeyword;
-typedef struct _DokASTUnit DokASTUnit;
+typedef struct _DokASTNamespace DokASTNamespace;
 typedef struct _DokASTDeclarator DokASTDeclarator;
 typedef struct _DokASTFuncDeclarator DokASTFuncDeclarator;
 typedef struct _DokASTDecl DokASTDecl;
@@ -41,7 +41,7 @@ enum _DokASTNodeType
     DOK_AST_NODE,
     DOK_AST_LIST,
     DOK_AST_IDENT,
-    DOK_AST_UNIT,
+    DOK_AST_NAMESPACE,
     DOK_AST_KEYWORD,
     DOK_AST_DECLARATOR,
     DOK_AST_FUNC_DECLARATOR,
@@ -107,17 +107,6 @@ struct _DokASTKeyword
 
 
 
-/* DokASTUnit:
- */
-struct _DokASTUnit
-{
-  DokASTNode super;
-
-  DokAST *decls;
-};
-
-
-
 /* DokASTDeclarator:
  */
 struct _DokASTDeclarator
@@ -150,6 +139,17 @@ struct _DokASTDecl
 
   DokAST *type;
   DokAST *ident;
+};
+
+
+
+/* DokASTNamespace:
+ */
+struct _DokASTNamespace
+{
+  DokASTDecl super;
+
+  DokAST *decls;
 };
 
 
@@ -291,15 +291,15 @@ DokAST *dok_ast_ident_new ( const gchar *name );
 DokAST *dok_ast_keyword_new ( gint token,
                               const gchar *name );
 
-/* DokASTUnit */
-#define DOK_AST_UNIT(n)    (DOK_AST_CAST((n), DOK_AST_UNIT, DokASTUnit))
-#define DOK_AST_IS_UNIT(n) (DOK_AST_CHECK((n), DOK_AST_UNIT))
+/* DokASTNamespace */
+#define DOK_AST_NAMESPACE(n)    (DOK_AST_CAST((n), DOK_AST_NAMESPACE, DokASTNamespace))
+#define DOK_AST_IS_NAMESPACE(n) (DOK_AST_CHECK((n), DOK_AST_NAMESPACE))
 
-#define DOK_AST_UNIT_DECLS(n) (DOK_AST_UNIT(n)->decls)
+#define DOK_AST_NAMESPACE_DECLS(n) (DOK_AST_NAMESPACE(n)->decls)
 
-DokAST *dok_ast_unit_new ( void );
-void dok_ast_unit_add_decls ( DokAST *unit,
-                              DokAST *decls );
+DokAST *dok_ast_namespace_new ( void );
+void dok_ast_namespace_add_decls ( DokAST *namespace,
+                                   DokAST *decls );
 
 /* DokASTDeclarator */
 #define DOK_AST_DECLARATOR(n)    (DOK_AST_CAST((n), DOK_AST_DECLARATOR, DokASTDeclarator))

@@ -28,7 +28,7 @@ input
 unit
   : ext_decl          { $$ = $1; }
   | ext_decl unit     { $$ = dok_ast_list_merge($1, $2); }
-;
+  ;
 
 ext_decl
   : func_def    { $$ = dok_ast_list_prepend(NULL, $1); }

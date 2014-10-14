@@ -10,8 +10,8 @@ static gpointer get_node_type ( gpointer node );
 
 static void accept_list ( DokVisitor *v,
                           DokAST *n );
-static void accept_unit ( DokVisitor *v,
-                          DokAST *n );
+static void accept_namespace ( DokVisitor *v,
+                               DokAST *n );
 static void accept_var_decl ( DokVisitor *v,
                               DokAST *n );
 static void accept_pointer ( DokVisitor *v,
@@ -33,7 +33,7 @@ DokVisitorClass *dok_ast_visitor_class_new ( void )
      NULL,                                              \
      NULL)
   REG(DOK_AST_LIST, list);
-  REG(DOK_AST_UNIT, unit);
+  REG(DOK_AST_NAMESPACE, namespace);
   REG(DOK_AST_VAR_DECL, var_decl);
   REG(DOK_AST_POINTER, pointer);
 #undef REG
@@ -64,12 +64,12 @@ static void accept_list ( DokVisitor *v,
 
 
 
-/* accept_unit:
+/* accept_namespace:
  */
-static void accept_unit ( DokVisitor *v,
-                          DokAST *n )
+static void accept_namespace ( DokVisitor *v,
+                               DokAST *n )
 {
-  dok_visitor_visit(v, DOK_AST_UNIT_DECLS(n));
+  dok_visitor_visit(v, DOK_AST_NAMESPACE_DECLS(n));
 }
 
 

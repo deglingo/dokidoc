@@ -12,7 +12,7 @@ typedef struct _DokASTProcessor
 {
   DokASTVisitor visitor;
 
-  xmlNodePtr root;
+  DokTree *tree;
   GSList *context;
 }
   DokASTProcessor;
@@ -23,10 +23,10 @@ static void enter_list ( DokVisitor *v,
                          DokAST *n );
 static void leave_list ( DokVisitor *v,
                          DokAST *n );
-static void enter_unit ( DokVisitor *v,
-                         DokAST *n );
-static void leave_unit ( DokVisitor *v,
-                         DokAST *n );
+static void enter_namespace ( DokVisitor *v,
+                              DokAST *n );
+static void leave_namespace ( DokVisitor *v,
+                              DokAST *n );
 static void enter_var_decl ( DokVisitor *v,
                              DokAST *n );
 static void leave_var_decl ( DokVisitor *v,
@@ -58,7 +58,7 @@ static DokVisitorClass *dok_ast_processor_get_class ( void )
          (DokVisitorFunc) enter_##name,                 \
          (DokVisitorFunc) leave_##name)
       REG(DOK_AST_LIST, list);
-      REG(DOK_AST_UNIT, unit);
+      REG(DOK_AST_NAMESPACE, namespace);
       REG(DOK_AST_VAR_DECL, var_decl);
       REG(DOK_AST_TYPE_NAME, type_name);
       REG(DOK_AST_POINTER, pointer);
@@ -75,8 +75,8 @@ DokVisitor *dok_ast_processor_new ( void )
 {
   DokVisitor *v = dok_visitor_new(dok_ast_processor_get_class());
   DokASTProcessor *p = (DokASTProcessor *) v;
-  /* p->root = dok_tree_new(); */
-  /* p->context = g_slist_prepend(NULL, p->root); */
+  p->tree = dok_tree_root_new();
+  /* p->context = g_slist_prepend(NULL, p->tree); */
   return v;
 }
 
@@ -86,14 +86,13 @@ DokVisitor *dok_ast_processor_new ( void )
  */
 DokTree *dok_ast_processor_get_tree ( DokVisitor *processor )
 {
-  CL_ERROR("[TODO]");
-  return NULL;
+  return ((DokASTProcessor *) processor)->tree;
 }
 
 
 
 #define proc ((DokASTProcessor *) v)
-#define ctxt ((DokTree *) (proc->context->data))
+#define ctxt (proc->context ? ((DokTree *) (proc->context->data)) : NULL)
 #define push(n) (proc->context = g_slist_prepend(proc->context, (n)))
 #define pop() (proc->context = g_slist_delete_link(proc->context, proc->context))
 
@@ -118,24 +117,24 @@ static void leave_list ( DokVisitor *v,
 
 
 
-/* enter_unit:
+/* enter_namespace:
  */
-static void enter_unit ( DokVisitor *v,
-                         DokAST *n )
+static void enter_namespace ( DokVisitor *v,
+                              DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  /* push(dok_tree_new_namespace(ctxt, "")); */
+  push(dok_tree_namespace_new(ctxt, "" /* [fixme] name */));
 }
 
 
 
-/* leave_unit:
+/* leave_namespace:
  */
-static void leave_unit ( DokVisitor *v,
-                         DokAST *n )
+static void leave_namespace ( DokVisitor *v,
+                              DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  /* pop(); */
+  pop();
 }
 
 

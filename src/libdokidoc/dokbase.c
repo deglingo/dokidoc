@@ -2,6 +2,7 @@
  */
 
 #include "libdokidoc/dokbase.h"
+#include "libdokidoc/doktype.h"
 #include "libdokidoc/dokast.h"
 
 
@@ -14,5 +15,6 @@ void libdokidoc_init ( void )
   if (done)
     return;
   done = TRUE;
+  _dok_type_init();
   _dok_ast_init();
 }

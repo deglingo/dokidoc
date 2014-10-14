@@ -4,29 +4,33 @@
 #ifndef _DOKTREE_H_
 #define _DOKTREE_H_
 
-#include "libdokidoc/dokbase.h"
+#include "libdokidoc/doktype.h"
 
 
 
-typedef enum _DokTreeType DokTreeType;
-typedef union _DokTree DokTree;
+typedef struct _DokTree DokTree;
+typedef struct _DokTreeClass DokTreeClass;
 typedef struct _DokTreeRoot DokTreeRoot;
-typedef struct _DokTreeVar DokTreeVar;
-typedef struct _DokTreeTypeName DokTreeTypeName;
-
-#define DOK_TREE_HEADER \
-  DokTreeType tree_type
+typedef struct _DokTreeDecl DokTreeDecl;
+typedef struct _DokTreeNamespace DokTreeNamespace;
 
 
 
-/* DokTreeType:
+/* DokTree:
  */
-enum _DokTreeType
-  {
-    DOK_TREE_ROOT,
-    DOK_TREE_VAR,
-    DOK_TREE_TYPE_NAME,
-  };
+struct _DokTree
+{
+  DokTypeInstance super;
+};
+
+
+
+/* DokTreeClasss:
+ */
+struct _DokTreeClass
+{
+  DokTypeClass super;
+};
 
 
 
@@ -34,54 +38,56 @@ enum _DokTreeType
  */
 struct _DokTreeRoot
 {
-  DOK_TREE_HEADER;
+  DokTree super;
 
   GPtrArray *decls;
 };
 
 
 
-/* DokTreeVar:
+/* DokTreeDecl:
  */
-struct _DokTreeVar
+struct _DokTreeDecl
 {
-  DOK_TREE_HEADER;
+  DokTree super;
 
-  gchar *name;
-  DokTree *type;
-};
-
-
-
-/* DokTreeTypeName:
- */
-struct _DokTreeTypeName
-{
-  DOK_TREE_HEADER;
+  DokTree *context;
   gchar *name;
 };
 
 
 
-/* DokTree:
+/* DokTreeNamespace:
  */
-union _DokTree
+struct _DokTreeNamespace
 {
-  DokTreeType tree_type;
-  DokTreeRoot t_root;
-  DokTreeVar t_var;
-  DokTreeTypeName t_type_name;
+  DokTreeDecl super;
 };
 
 
 
-DokTree *dok_tree_new ( void );
-xmlDocPtr dok_tree_dump ( DokTree *tree );
-DokTree *dok_tree_new_var ( const gchar *name,
-                            DokTree *type );
-DokTree *dok_tree_new_type_name ( const gchar *type_name );
-void dok_tree_add_decl ( DokTree *tree,
-                         DokTree *decl );
+/* DokTree */
+#define DOK_TYPE_TREE (dok_tree_get_type())
+#define DOK_TREE(n) (DOK_TYPE_INSTANCE_CAST((n), DOK_TYPE_TREE, DokTree))
+
+/* DokTreeRoot */
+#define DOK_TYPE_TREE_ROOT (dok_tree_root_get_type())
+#define DOK_TREE_ROOT(n) (DOK_TYPE_INSTANCE_CAST((n), DOK_TYPE_TREE_ROOT, DokTreeRoot))
+
+DokType dok_tree_root_get_type ( void );
+DokTree *dok_tree_root_new ( void );
+
+/* DokTreeDecl */
+#define DOK_TYPE_TREE_DECL (dok_tree_decl_get_type())
+#define DOK_TREE_DECL(n) (DOK_TYPE_INSTANCE_CAST((n), DOK_TYPE_TREE_DECL, DokTreeDecl))
+#define DOK_IS_TREE_DECL(n) (DOK_TYPE_INSTANCE_CHECK((n), DOK_TYPE_TREE_DECL))
+
+/* DokTreeNamespace */
+#define DOK_TYPE_TREE_NAMESPACE (dok_tree_namespace_get_type())
+#define DOK_TREE_NAMESPACE(n) (DOK_TYPE_INSTANCE_CAST((n), DOK_TREE_TYPE_NAMESPACE, DokTreeNamespace))
+
+DokTree *dok_tree_namespace_new ( DokTree *context,
+                                  const gchar *name );
 
 
 
