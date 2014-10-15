@@ -13,8 +13,10 @@ typedef struct _Lexer Lexer;
 
 
 Lexer *lexer_new ( const gchar *filename );
-Token *lexer_lex ( Lexer *lexer );
-Token *lexer_lex_include ( Lexer *lexer );
+Token *lexer_lex ( Lexer *lexer,
+                   DokLocation *loc );
+Token *lexer_lex_include ( Lexer *lexer,
+                           DokLocation *loc );
 
 
 

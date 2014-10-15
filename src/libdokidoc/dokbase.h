@@ -16,7 +16,10 @@ typedef struct _DokLocation
 {
   GQuark qfile;
   gint lineno;
+  gint charno;
+  GQuark end_qfile;
   gint end_lineno;
+  gint end_charno;
 }
   DokLocation;
 

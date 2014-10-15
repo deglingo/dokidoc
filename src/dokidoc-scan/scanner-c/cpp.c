@@ -15,6 +15,7 @@ struct _CPP
 {
   Lexer *lexer;
   Token *unlex_token;
+  DokLocation unlex_loc;
 };
 
 
@@ -35,19 +36,20 @@ CPP *cpp_new ( const gchar *filename )
 static void _parse_directive ( CPP *cpp )
 {
   Token *tok;
+  DokLocation loc = { 0, };
   /* skip whites */
   do {
-    tok = lexer_lex(cpp->lexer);
+    tok = lexer_lex(cpp->lexer, &loc);
   } while (tok->type == TOK_SPACE);
   ASSERT(tok->type == TOK_IDENT);
   if (!strcmp(tok->value, "include"))
     {
       /* [FIXME] */
-      tok = lexer_lex_include(cpp->lexer);
+      tok = lexer_lex_include(cpp->lexer, &loc);
       ASSERT(tok->type == TOK_INCLUDE);
       CL_DEBUG("include: '%s'", tok->value);
       do {
-        tok = lexer_lex(cpp->lexer);
+        tok = lexer_lex(cpp->lexer, &loc);
         ASSERT(tok->type == TOK_NL || tok->type == TOK_COMMENT);
       } while (tok->type != TOK_NL);
     }
@@ -55,7 +57,7 @@ static void _parse_directive ( CPP *cpp )
     {
       CL_DEBUG("[TODO] unknown directive: '%s'", tok->value);
       do {
-        tok = lexer_lex(cpp->lexer);
+        tok = lexer_lex(cpp->lexer, &loc);
       } while (tok->type != TOK_NL);
     }
 }
@@ -64,18 +66,20 @@ static void _parse_directive ( CPP *cpp )
 
 /* cpp_lex:
  */
-Token *cpp_lex ( CPP *cpp )
+Token *cpp_lex ( CPP *cpp,
+                 DokLocation *loc )
 {
   Token *tok;
   if (cpp->unlex_token)
     {
       tok = cpp->unlex_token;
+      *loc = cpp->unlex_loc;
       cpp->unlex_token = NULL;
       return tok;
     }
   while (1)
     {
-      if (!(tok = lexer_lex(cpp->lexer)))
+      if (!(tok = lexer_lex(cpp->lexer, loc)))
         return NULL;
       switch (tok->type)
         {
@@ -105,9 +109,11 @@ Token *cpp_lex ( CPP *cpp )
 /* cpp_unlex:
  */
 void cpp_unlex ( CPP *cpp,
-                 Token *token )
+                 Token *token,
+                 DokLocation *loc )
 {
   /* [fixme] */
   ASSERT(!cpp->unlex_token);
   cpp->unlex_token = token;
+  cpp->unlex_loc = *loc;
 }

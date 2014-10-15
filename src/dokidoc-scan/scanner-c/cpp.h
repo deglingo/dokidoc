@@ -13,9 +13,11 @@ typedef struct _CPP CPP;
 
 
 CPP *cpp_new ( const gchar *filename );
-Token *cpp_lex ( CPP *cpp );
+Token *cpp_lex ( CPP *cpp,
+                 DokLocation *loc );
 void cpp_unlex ( CPP *cpp,
-                 Token *token );
+                 Token *token,
+                 DokLocation *loc );
 
 
 

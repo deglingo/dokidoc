@@ -94,7 +94,7 @@ void dokidoc_scanner_module_init ( DokScannerFuncs *funcs )
 /* yylex:
  */
 int yylex ( DokAST **lvalp,
-            Loc *llocp,
+            DokLocation *loc,
             DokScanner *scanner )
 {
   Token *tok;
@@ -103,7 +103,7 @@ int yylex ( DokAST **lvalp,
   /* CL_TRACE("%p", scanner); */
   while (1)
     {
-      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp)))
+      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp, loc)))
         return 0;
       CL_DEBUG("TOKEN: %d (%s)", tok->type, tok->value);
       switch (tok->type)
@@ -133,7 +133,7 @@ int yylex ( DokAST **lvalp,
 
 /* yyerror:
  */
-void yyerror ( Loc *locp,
+void yyerror ( DokLocation *locp,
                DokScanner *scanner,
                char const *msg )
 {
@@ -148,16 +148,17 @@ void eat_function_body ( DokScanner *scanner )
 {
   Token *tok;
   gint depth = 1;
+  DokLocation loc;
   CL_TRACE("%p", scanner);
   while (1)
     {
-      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp)))
+      if (!(tok = cpp_lex(((DokScannerC *) scanner)->cpp, &loc)))
         CL_ERROR("EOF in function body");
       if (tok->type == '{') {
         ++depth;
       } else if (tok->type == '}') {
         if ((--depth) == 0) {
-          cpp_unlex(((DokScannerC *) scanner)->cpp, tok);
+          cpp_unlex(((DokScannerC *) scanner)->cpp, tok, &loc);
           return;
         }
       }

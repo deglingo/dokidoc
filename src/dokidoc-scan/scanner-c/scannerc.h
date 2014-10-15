@@ -23,34 +23,21 @@ enum
   };
 
 
-
-typedef struct _Loc
-{
-  gchar *filename;
-  gssize lineno;
-  gssize charno;
-  gchar *end_filename;
-  gssize end_lineno;
-  gssize end_charno;
-}
-  Loc;
-
-
 #define YYSTYPE DokAST *
-#define YYLTYPE Loc
+#define YYLTYPE DokLocation
 
 /* [fixme] how to handle filename ? */
 #define YYLLOC_DEFAULT(cur, rhs, n) do {                    \
     if (n) {                                                \
-      (cur).filename = YYRHSLOC(rhs, 1).filename;           \
+      (cur).qfile = YYRHSLOC(rhs, 1).qfile;                 \
       (cur).lineno = YYRHSLOC(rhs, 1).lineno;               \
       (cur).charno = YYRHSLOC(rhs, 1).charno;               \
-      (cur).end_filename = YYRHSLOC(rhs, n).end_filename;   \
+      (cur).end_qfile = YYRHSLOC(rhs, n).end_qfile;         \
       (cur).end_lineno = YYRHSLOC(rhs, n).end_lineno;       \
       (cur).end_charno = YYRHSLOC(rhs, n).end_charno;       \
     } else {                                                \
-      (cur).filename = (cur).end_filename =                 \
-        YYRHSLOC(rhs, 0).end_filename;                      \
+      (cur).qfile = (cur).end_qfile =                       \
+        YYRHSLOC(rhs, 0).end_qfile;                         \
       (cur).lineno = (cur).end_lineno =                     \
         YYRHSLOC(rhs, 0).end_lineno;                        \
       (cur).charno = (cur).end_charno =                     \
@@ -60,9 +47,9 @@ typedef struct _Loc
 
 int yyparse ( DokScanner *scanner );
 int yylex ( DokAST **lvalp,
-            Loc *llocp,
+            DokLocation *llocp,
             DokScanner *scanner );
-void yyerror ( Loc *locp,
+void yyerror ( DokLocation *locp,
                DokScanner *scanner,
                char const * );
 

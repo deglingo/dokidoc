@@ -5,6 +5,7 @@
 #include "scannercgram.h"
 #include "scannerc.h"
 #include <stdio.h>
+#include <string.h>
 
 
 
@@ -80,8 +81,11 @@ static LexRule LEX_RULES[] =
 struct _Lexer
 {
   gchar *filename;
+  GQuark qfilename;
   FILE *f;
   GString *buffer;
+  gint lineno;
+  gint next_lineno;
   gsize charno;
   gboolean in_comment;
   GString *comment;
@@ -163,8 +167,13 @@ static Token *token_new ( gint type,
 Lexer *lexer_new ( const gchar *filename )
 {
   Lexer *lexer = g_new0(Lexer, 1);
+  char *path;
   lex_rules_init();
-  lexer->filename = g_strdup(filename);
+  path = realpath(filename, NULL);
+  lexer->filename = g_strdup(path);
+  free(path);
+  lexer->qfilename = g_quark_from_string(lexer->filename);
+  lexer->next_lineno = 1;
   if (!(lexer->f = fopen(filename, "r")))
     CL_ERROR("could not open file: '%s'", filename);
   lexer->buffer = g_string_new("");
@@ -181,6 +190,7 @@ static gboolean _feed_buffer ( Lexer *lexer )
   gint c;
   g_string_truncate(lexer->buffer, 0);
   lexer->charno = 0;
+  lexer->lineno = lexer->next_lineno;
   while (1)
     {
       c = fgetc(lexer->f);
@@ -201,6 +211,7 @@ static gboolean _feed_buffer ( Lexer *lexer )
         }
       else if (c == '\n')
         {
+          lexer->next_lineno++;
           g_string_append_c(lexer->buffer, '\n');
           return TRUE;
         }
@@ -210,6 +221,7 @@ static gboolean _feed_buffer ( Lexer *lexer )
           if (c == EOF) {
             CL_ERROR("[TODO]");
           } else if (c == '\n') {
+            lexer->next_lineno++;
             g_string_append_c(lexer->buffer, ' ');
           } else {
             g_string_append_c(lexer->buffer, '\\');
@@ -227,14 +239,18 @@ static gboolean _feed_buffer ( Lexer *lexer )
 
 /* lexer_lex:
  */
-Token *lexer_lex ( Lexer *lexer )
+Token *lexer_lex ( Lexer *lexer,
+                   DokLocation *loc )
 {
   LexRule *rule;
   gint tok_len;
   gchar *buf;
   Token *tok;
+  /* [fixme] */
+  memset(loc, 0, sizeof(DokLocation));
   while (1)
     {
+      gint charno;
       /* feed the line buffer */
       while (lexer->charno >= lexer->buffer->len)
         if (!_feed_buffer(lexer))
@@ -250,6 +266,7 @@ Token *lexer_lex ( Lexer *lexer )
         {
           CL_ERROR("no match: `%s' (state=%d)", lexer->buffer->str + lexer->charno, lexer->state);
         }
+      charno = lexer->charno;
       buf = lexer->buffer->str + lexer->charno;
       lexer->charno += tok_len;
       switch (rule->token)
@@ -268,6 +285,10 @@ Token *lexer_lex ( Lexer *lexer )
           lexer->state = LEXER_STATE_NORMAL;
           return tok;
         default:
+          loc->qfile = loc->end_qfile = lexer->qfilename;
+          loc->lineno = loc->end_lineno = lexer->lineno;
+          loc->charno = charno;
+          loc->end_charno = lexer->charno - 1;
           tok = token_new(rule->token, buf, tok_len);
           return tok;
         }
@@ -278,12 +299,13 @@ Token *lexer_lex ( Lexer *lexer )
 
 /* lexer_lex_include:
  */
-Token *lexer_lex_include ( Lexer *lexer )
+Token *lexer_lex_include ( Lexer *lexer,
+                           DokLocation *loc )
 {
   LexerState state = lexer->state;
   Token *tok;
   lexer->state = LEXER_STATE_INCLUDE;
-  tok = lexer_lex(lexer);
+  tok = lexer_lex(lexer, loc);
   ASSERT(tok);
   lexer->state = state;
   return tok;
