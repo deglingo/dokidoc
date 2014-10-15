@@ -6,6 +6,7 @@ TOP_BUILDDIR='@abs_top_builddir@'
 
 #DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/.libs/lt-dokidoc-scan"
 DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
+DOKIDOC_FILTER="$TOP_BUILDDIR/src/dokidoc-filter/dokidoc-filter"
 
 export G_DEBUG='gc-friendly'
 export G_SLICE='all'
@@ -26,5 +27,7 @@ export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
 #     "$DOKIDOC_SCAN" dokidoc-test-scan.conf
 
 "$DOKIDOC_SCAN" dokidoc-test-scan.conf
+
+"$DOKIDOC_FILTER" -i dokidoc-test-scan.conf
 
 # "$DOKIDOC_FILTER" -i source1.xml
