@@ -15,19 +15,33 @@ enum
 
 
 
+/* dump_templates:
+ */
+static void dump_templates ( DokConfig *config,
+                             DokTree *tree )
+{
+  DokVisitor *visitor;
+  CL_DEBUG("TEMPLATES DUMP");
+  visitor = dok_tree_tmpl_dumper_new();
+  dok_visitor_visit(visitor, tree);
+}
+
+
+
 /* proc_input:
  */
 static void proc_input ( DokConfig *config )
 {
   GList *l;
+  DokTree *tree = dok_tree_root_new();
   for (l = config->source_files; l; l = l->next)
     {
       DokSourceFile *file = l->data;
-      DokTree *tree;
-      if (!(tree = dok_tree_load(file->xmlpath)))
+      if (!dok_tree_load(tree, file->xmlpath))
         CL_ERROR("could not load doktree: '%s'", file->xmlpath);
     }
-  CL_DEBUG("[TODO] ...");
+  /* [TODO] load templates */
+  dump_templates(config, tree);
 }
 
 

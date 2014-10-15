@@ -8,7 +8,8 @@
 
 
 
-DokTree *dok_tree_load ( const gchar *fname );
+gboolean dok_tree_load ( DokTree *tree,
+                         const gchar *fname );
 
 
 

@@ -158,7 +158,8 @@ static const gchar *reqattr ( const gchar *name,
 
 /* dok_tree_load:
  */
-DokTree *dok_tree_load ( const gchar *fname )
+gboolean dok_tree_load ( DokTree *tree,
+                         const gchar *fname )
 {
   GMarkupParseContext *context;
   FILE *f;
@@ -170,6 +171,7 @@ DokTree *dok_tree_load ( const gchar *fname )
   CL_DEBUG("loading doktree file: '%s'", fname);
 
   loader = g_new0(Loader, 1);
+  loader->tree = tree;
   loader->text = g_string_new("");
   loader->idmap = g_hash_table_new(NULL, NULL);
   context = g_markup_parse_context_new(&MARKUP_PARSER, 0, loader, NULL);
@@ -198,8 +200,7 @@ DokTree *dok_tree_load ( const gchar *fname )
     }
   fclose(f);
 
-  ASSERT(loader->tree);
-  return loader->tree;
+  return TRUE;
 }
 
 
@@ -305,7 +306,7 @@ static void start_root ( Loader *loader,
                          GError **error )
 {
   CL_TRACE("%s", element_name);
-  loader->tree = dok_tree_root_new();
+  /* loader->tree = dok_tree_root_new(); */
 }
 
 
