@@ -76,7 +76,7 @@ DokVisitor *dok_ast_processor_new ( void )
   DokVisitor *v = dok_visitor_new(dok_ast_processor_get_class());
   DokASTProcessor *p = (DokASTProcessor *) v;
   p->tree = dok_tree_root_new();
-  /* p->context = g_slist_prepend(NULL, p->tree); */
+  p->context = g_slist_prepend(NULL, p->tree);
   return v;
 }
 
@@ -123,7 +123,7 @@ static void enter_namespace ( DokVisitor *v,
                               DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  push(dok_tree_namespace_new(ctxt, "" /* [fixme] name */));
+  push(dok_tree_get_namespace(proc->tree, NULL /* [fixme] ctxt */, "" /* [fixme] name */));
 }
 
 
@@ -145,7 +145,7 @@ static void enter_var_decl ( DokVisitor *v,
                              DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  /* push(dok_tree_var(ctxt, DOK_AST_DECL_NAME(n))); */
+  push(dok_tree_get_var(proc->tree, ctxt, DOK_AST_DECL_NAME(n)));
 }
 
 
@@ -156,7 +156,7 @@ static void leave_var_decl ( DokVisitor *v,
                              DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  /* pop(); */
+  pop();
 }
 
 

@@ -19,5 +19,11 @@
 
 #include "libdokidoc/doktree.h"
 
+#include "libdokidoc/doktreevisitor.h"
+
+#include "libdokidoc/doktreedumper.h"
+
+#include "libdokidoc/doktreexmldumper.h"
+
 
 #endif

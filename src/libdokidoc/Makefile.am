@@ -21,7 +21,10 @@ libdokidocinclude_HEADERS = \
 	dokastdumper.h \
 	dokastprocessor.h \
 	dokscanner.h \
-	doktree.h
+	doktree.h \
+	doktreevisitor.h \
+	doktreedumper.h \
+	doktreexmldumper.h
 
 libdokidoc_la_SOURCES = \
 	dokbase.c \
@@ -32,4 +35,7 @@ libdokidoc_la_SOURCES = \
 	dokastdumper.c \
 	dokastprocessor.c \
 	dokscanner.c \
-	doktree.c
+	doktree.c \
+	doktreevisitor.c \
+	doktreedumper.c \
+	doktreexmldumper.c

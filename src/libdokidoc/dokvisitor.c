@@ -89,6 +89,8 @@ void dok_visitor_visit ( DokVisitor *visitor,
   /* accept */
   if (funcs && funcs->accept)
     funcs->accept(visitor, node);
+  else if (cls->accept_default)
+    cls->accept_default(visitor, node);
   /* leave */
   if (funcs && funcs->leave)
     funcs->leave(visitor, node);

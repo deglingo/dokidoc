@@ -25,7 +25,8 @@ typedef struct _SourceFile
 {
   SourceBase *base;
   /* realpath */
-  gchar *path;
+  gchar *fullpath;
+  gchar *basepath;
 }
   SourceFile;
 
@@ -92,7 +93,7 @@ static SourceFile *_find_file ( Config *config,
   GList *l;
   for (l = config->source_files; l; l = l->next)
     {
-      if (!strcmp(path, ((SourceFile *) (l->data))->path))
+      if (!strcmp(path, ((SourceFile *) (l->data))->fullpath))
         return l->data;
     }
   return NULL;
@@ -125,8 +126,8 @@ static SourceBase *_find_base ( Config *config,
 static gint _sort_source_files ( gconstpointer a,
                                  gconstpointer b )
 {
-  return strcmp(((SourceFile *) a)->path,
-                ((SourceFile *) b)->path);
+  return strcmp(((SourceFile *) a)->fullpath,
+                ((SourceFile *) b)->fullpath);
 }
 
 
@@ -162,7 +163,8 @@ static void _get_sources ( Config *config,
       source_file = g_new0(SourceFile, 1);
       if (!(source_file->base = _find_base(config, full_path)))
         CL_ERROR("no source base found for '%s'", full_path);
-      source_file->path = g_strdup(full_path);
+      source_file->fullpath = g_strdup(full_path);
+      source_file->basepath = source_file->fullpath + strlen(source_file->base->path) + 1;
       config->source_files = g_list_append(config->source_files, source_file);
       free(full_path);
     }
@@ -203,16 +205,14 @@ static void _process_file ( Config *config,
                             SourceFile *file )
 {
   DokScanner *scanner;
-  xmlNodePtr xmlnode;
-  xmlDocPtr xmldoc;
   DokVisitor *visitor;
   DokAST *ast;
   GError *error = NULL;
-  CL_DEBUG("pocessing file: '%s'", file->path);
+  gchar *xmlfile;
+  CL_DEBUG("pocessing file: '%s' (%s)", file->basepath, file->fullpath);
   scanner = dok_scanner_new(cls);
-  if (!(ast = dok_scanner_process(scanner, file->path, &error)))
+  if (!(ast = dok_scanner_process(scanner, file->fullpath, &error)))
     CL_ERROR("process error: %s", error->message);
-  xmlnode = xmlNewNode(NULL, BAD_CAST "root");
   /* dump */
   {
     DokVisitor *dumper = dok_ast_dumper_new(stderr);
@@ -223,11 +223,37 @@ static void _process_file ( Config *config,
   CL_DEBUG("AST PROCESS...");
   visitor = dok_ast_processor_new();
   dok_visitor_visit(visitor, ast);
-  /* xmlnode = dok_ast_processor_get_root(visitor); */
+  {
+    DokTree *tree = dok_ast_processor_get_tree(visitor);
+    DokVisitor *tree_dumper = dok_tree_dumper_new(stderr);
+    CL_DEBUG("TREE DUMP:");
+    dok_visitor_visit(tree_dumper, tree);
+  }
+  {
+    xmlNodePtr xmlnode;
+    xmlDocPtr xmldoc;
+    gchar *c, *x;
+    FILE *f;
+    xmlfile = g_malloc(strlen(file->basepath)+5);
+    for (c = file->basepath, x = xmlfile; *c; c++, x++)
+      *x = ((*c) == '/') ? '$' : (*c);
+    sprintf(x, ".xml");
+    DokTree *tree = dok_ast_processor_get_tree(visitor);
+    DokVisitor *xmldumper = dok_tree_xml_dumper_new();
+    dok_visitor_visit(xmldumper, tree);
+    xmlnode = dok_tree_xml_dumper_get_root(xmldumper);
+    CL_DEBUG("xmlnode: %p", xmlnode);
+    xmldoc = xmlNewDoc(BAD_CAST "1.0");
+    xmlDocSetRootElement(xmldoc, xmlnode);
+    if (!(f = fopen(xmlfile, "w")))
+      CL_ERROR("could not open file: '%s'", xmlfile);
+    CL_DEBUG("XML DUMP: '%s'", xmlfile);
+    xmlDocFormatDump(f, xmldoc, 1);
+    fclose(f);
+  }
   /* xmldoc = xmlNewDoc(BAD_CAST "1.0"); */
   /* xmlDocSetRootElement(xmldoc, xmlnode); */
   /* CL_DEBUG("[TODO] xmldoc: %p", xmldoc); */
-  /* xmlDocDump(stderr, xmldoc); */
 }
 
 
