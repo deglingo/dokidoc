@@ -8,11 +8,34 @@
 
 
 
+/* DokSourceBase:
+ */
+typedef struct _DokSourceBase
+{
+  gchar *path;
+}
+  DokSourceBase;
+
+
+
+/* DokSourceFiler:
+ */
+typedef struct _DokSourceFile
+{
+  DokSourceBase *base;
+  gchar *fullpath;
+  gchar *basepath;
+}
+  DokSourceFile;
+
+
+
 /* DokConfig:
  */
 typedef struct _DokConfig
 {
-  int dummy;
+  GList *source_bases;
+  GList *source_files;
 }
   DokConfig;
 
