@@ -44,8 +44,8 @@ func_proto
   ;
 
 decl
-  : decl_specs ';'                   { $$ = collect_decls(scanner, $1, NULL); }
-  | decl_specs init_decl_list ';'    { $$ = collect_decls(scanner, $1, $2); }
+  : decl_specs ';'                   { $$ = collect_decls(scanner, $1, NULL, &@$); }
+  | decl_specs init_decl_list ';'    { $$ = collect_decls(scanner, $1, $2, &@$); }
   | TOK_TYPEDEF decl_specs declarator ';' { $$ = collect_typedef(scanner, $2, $3); }
   ;
 

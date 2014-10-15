@@ -171,7 +171,8 @@ void eat_function_body ( DokScanner *scanner )
  */
 DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *type,
-                        DokAST *declarators )
+                        DokAST *declarators,
+                        DokLocation *loc )
 {
   DokAST *l;
   DokAST *decl_list = NULL;
@@ -185,7 +186,7 @@ DokAST *collect_decls ( DokScanner *scanner,
       CL_DEBUG("    - %s", dok_ast_to_string(item));
       item_type = dok_ast_declarator_chain_type(item, type);
       ident = DOK_AST_DECLARATOR_IDENT(item);
-      decl = dok_ast_var_decl_new(item_type, ident);
+      decl = dok_ast_var_decl_new(item_type, ident, loc);
       decl_list = dok_ast_list_append(decl_list, decl);
     }
   return decl_list;

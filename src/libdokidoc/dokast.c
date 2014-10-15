@@ -552,12 +552,14 @@ DokAST *dok_ast_func_decl_new ( DokAST *type_spec,
 /* dok_ast_var_decl_new:
  */
 DokAST *dok_ast_var_decl_new ( DokAST *type,
-                               DokAST *ident )
+                               DokAST *ident,
+                               DokLocation *loc )
 {
   DokAST *node = dok_ast_new(DOK_AST_VAR_DECL);
   /* [FIXME] */
   DOK_AST_DECL(node)->type = type;
   DOK_AST_DECL(node)->ident = ident;
+  DOK_AST_DECL(node)->loc = *loc;
   return node;
 }
 

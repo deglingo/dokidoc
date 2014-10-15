@@ -139,6 +139,7 @@ struct _DokASTDecl
 
   DokAST *type;
   DokAST *ident;
+  DokLocation loc;
 };
 
 
@@ -356,7 +357,8 @@ DokAST *dok_ast_func_decl_new ( DokAST *type_spec,
 #define DOK_AST_IS_VAR_DECL(n) (DOK_AST_CHECK((n), DOK_AST_VAR_DECL))
 
 DokAST *dok_ast_var_decl_new ( DokAST *type,
-                               DokAST *ident );
+                               DokAST *ident,
+                               DokLocation *loc );
 
 /* DokASTType */
 #define DOK_AST_TYPE(n)    (DOK_AST_CAST((n), DOK_AST_TYPE, DokASTType))

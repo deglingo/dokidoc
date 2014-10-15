@@ -56,7 +56,8 @@ void yyerror ( DokLocation *locp,
 void eat_function_body ( DokScanner *scanner );
 DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *type_specs,
-                        DokAST *declarators );
+                        DokAST *declarators,
+                        DokLocation *loc );
 DokAST *collect_typedef ( DokScanner *scanner,
                           DokAST *type_specs,
                           DokAST *declarator );
