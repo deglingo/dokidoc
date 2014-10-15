@@ -4,6 +4,8 @@
 #ifndef _DOKTYPE_H_
 #define _DOKTYPE_H_
 
+#include "libdokidoc/dokbase.h"
+
 
 
 typedef guint DokType;

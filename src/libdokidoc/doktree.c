@@ -41,7 +41,19 @@ DokTree *dok_tree_root_new ( void )
 {
   DokTree *tree = DOK_TREE(dok_type_instance_new(DOK_TYPE_TREE_ROOT));
   DOK_TREE_ROOT(tree)->decls = g_ptr_array_new();
+  DOK_TREE_ROOT(tree)->decls_id = g_hash_table_new(NULL, NULL);
   return tree;
+}
+
+
+
+/* dok_tree_get_decl_by_id:
+ */
+DokTree *dok_tree_get_decl_by_id ( DokTree *tree,
+                                   DokTreeID id )
+{
+  return g_hash_table_lookup(DOK_TREE_ROOT(tree)->decls_id,
+                             GUINT_TO_POINTER(id));
 }
 
 
@@ -63,6 +75,9 @@ static DokTree *dok_tree_decl_new ( DokTree *tree,
   DOK_TREE_DECL(decl)->context = context;
   DOK_TREE_DECL(decl)->name = g_strdup(name);
   g_ptr_array_add(DOK_TREE_ROOT(tree)->decls, decl);
+  g_hash_table_insert(DOK_TREE_ROOT(tree)->decls_id,
+                      GUINT_TO_POINTER(DOK_TREE_DECL(decl)->id),
+                      decl);
   return decl;
 }
 

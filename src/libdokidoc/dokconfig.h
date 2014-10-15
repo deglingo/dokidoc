@@ -25,6 +25,7 @@ typedef struct _DokSourceFile
   DokSourceBase *base;
   gchar *fullpath;
   gchar *basepath;
+  gchar *xmlpath;
 }
   DokSourceFile;
 
@@ -34,6 +35,7 @@ typedef struct _DokSourceFile
  */
 typedef struct _DokConfig
 {
+  gchar *xmldir;
   GList *source_bases;
   GList *source_files;
 }

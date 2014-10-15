@@ -27,5 +27,7 @@
 
 #include "libdokidoc/doktreexmldumper.h"
 
+#include "libdokidoc/doktreeload.h"
+
 
 #endif

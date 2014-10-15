@@ -56,6 +56,7 @@ struct _DokTreeRoot
 
   DokTreeID id_counter;
   GPtrArray *decls;
+  GHashTable *decls_id;
 };
 
 
@@ -86,6 +87,8 @@ gchar *dok_tree_to_string ( DokTree *tree );
 
 DokType dok_tree_root_get_type ( void );
 DokTree *dok_tree_root_new ( void );
+DokTree *dok_tree_get_decl_by_id ( DokTree *tree,
+                                   DokTreeID id );
 DokTree *dok_tree_get_namespace ( DokTree *tree,
                                   DokTree *context,
                                   const gchar *name );

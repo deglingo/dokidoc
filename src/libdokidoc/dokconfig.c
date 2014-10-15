@@ -82,6 +82,23 @@ static gint _sort_source_files ( gconstpointer a,
 
 
 
+/* _get_xmlpath:
+ */
+static gchar *_get_xmlpath ( DokConfig *config,
+                             DokSourceFile *file )
+{
+  gchar *base = g_alloca(strlen(file->basepath) + 5);
+  gchar *path;
+  gchar *c, *x;
+  for (c = file->basepath, x = base; *c; c++, x++)
+    *x = ((*c) == '/') ? '$' : (*c);
+  sprintf(x, ".xml");
+  path = g_build_filename(config->xmldir, base, NULL);
+  return path;
+}
+
+
+
 /* _get_sources:
  */
 static void _get_sources ( DokConfig *config,
@@ -115,6 +132,7 @@ static void _get_sources ( DokConfig *config,
         CL_ERROR("no source base found for '%s'", full_path);
       source_file->fullpath = g_strdup(full_path);
       source_file->basepath = source_file->fullpath + strlen(source_file->base->path) + 1;
+      source_file->xmlpath = _get_xmlpath(config, source_file);
       config->source_files = g_list_append(config->source_files, source_file);
       free(full_path);
     }
@@ -142,6 +160,9 @@ static void parse_config ( DokConfig *config,
   if (!g_key_file_load_from_file(kfile, cfgfile, 0, &error))
     CL_ERROR("error in config file: %s", error->message);
   /* get params */
+  if (!(config->xmldir = g_key_file_get_string(kfile, "DEFAULT", "xmldir", &error))) {
+    config->xmldir = g_strdup("xml");
+  }
   _get_source_bases(config, kfile);
   _get_sources(config, kfile);
 }

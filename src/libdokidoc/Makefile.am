@@ -25,7 +25,8 @@ libdokidocinclude_HEADERS = \
 	doktree.h \
 	doktreevisitor.h \
 	doktreedumper.h \
-	doktreexmldumper.h
+	doktreexmldumper.h \
+	doktreeload.h
 
 libdokidoc_la_SOURCES = \
 	dokbase.c \
@@ -40,4 +41,5 @@ libdokidoc_la_SOURCES = \
 	doktree.c \
 	doktreevisitor.c \
 	doktreedumper.c \
-	doktreexmldumper.c
+	doktreexmldumper.c \
+	doktreeload.c

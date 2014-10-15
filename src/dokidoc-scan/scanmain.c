@@ -6,6 +6,8 @@
 
 #include <clog.h>
 #include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
 
 
 
@@ -38,7 +40,6 @@ static void _process_file ( DokConfig *config,
   DokVisitor *visitor;
   DokAST *ast;
   GError *error = NULL;
-  gchar *xmlfile;
   CL_DEBUG("pocessing file: '%s' (%s)", file->basepath, file->fullpath);
   scanner = dok_scanner_new(cls);
   if (!(ast = dok_scanner_process(scanner, file->fullpath, &error)))
@@ -62,12 +63,7 @@ static void _process_file ( DokConfig *config,
   {
     xmlNodePtr xmlnode;
     xmlDocPtr xmldoc;
-    gchar *c, *x;
     FILE *f;
-    xmlfile = g_malloc(strlen(file->basepath)+5);
-    for (c = file->basepath, x = xmlfile; *c; c++, x++)
-      *x = ((*c) == '/') ? '$' : (*c);
-    sprintf(x, ".xml");
     DokTree *tree = dok_ast_processor_get_tree(visitor);
     DokVisitor *xmldumper = dok_tree_xml_dumper_new();
     dok_visitor_visit(xmldumper, tree);
@@ -75,9 +71,14 @@ static void _process_file ( DokConfig *config,
     CL_DEBUG("xmlnode: %p", xmlnode);
     xmldoc = xmlNewDoc(BAD_CAST "1.0");
     xmlDocSetRootElement(xmldoc, xmlnode);
-    if (!(f = fopen(xmlfile, "w")))
-      CL_ERROR("could not open file: '%s'", xmlfile);
-    CL_DEBUG("XML DUMP: '%s'", xmlfile);
+    /* create xmldir */
+    if (!g_file_test(config->xmldir, G_FILE_TEST_IS_DIR)) {
+      if (mkdir(config->xmldir, 0777) != 0)
+        CL_ERROR("could not create xmldir '%s' : %s", config->xmldir, strerror(errno));
+    }
+    if (!(f = fopen(file->xmlpath, "w")))
+      CL_ERROR("could not open file: '%s'", file->xmlpath);
+    CL_DEBUG("XML DUMP: '%s'", file->xmlpath);
     xmlDocFormatDump(f, xmldoc, 1);
     fclose(f);
   }

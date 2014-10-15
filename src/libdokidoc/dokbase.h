@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include <libxml/tree.h>
+#include <libxml/xmlreader.h>
 
 
 
