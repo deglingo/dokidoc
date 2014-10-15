@@ -36,7 +36,11 @@ ext_decl
   ;
 
 func_def
-  : decl_specs declarator '{' { eat_function_body(scanner); } '}'    { $$ = dok_ast_func_decl_new($1, $2); }
+  : func_proto '{' { eat_function_body(scanner); } '}'    { $$ = $1; }
+  ;
+
+func_proto
+  : decl_specs declarator    { $$ = dok_ast_func_decl_new($1, $2); }
   ;
 
 decl
