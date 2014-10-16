@@ -333,6 +333,7 @@ DokAST *dok_ast_func_declarator_new ( DokAST *target );
 #define DOK_AST_DECL_TYPE(n) (DOK_AST_DECL(n)->type)
 #define DOK_AST_DECL_IDENT(n) (DOK_AST_DECL(n)->ident)
 #define DOK_AST_DECL_NAME(n) (DOK_AST_DECL_IDENT(n) ? DOK_AST_IDENT_NAME(DOK_AST_DECL_IDENT(n)) : "??")
+#define DOK_AST_DECL_LOC(n) (DOK_AST_DECL(n)->loc)
 
 DokAST *dok_ast_decl_new ( DokASTNodeType type,
                            DokAST *type_spec,

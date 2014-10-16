@@ -71,6 +71,7 @@ struct _DokTreeDecl
   DokTreeDeclType decl_type;
   DokTree *context;
   gchar *name;
+  DokLocation loc;
 };
 
 
@@ -94,7 +95,8 @@ DokTree *dok_tree_get_namespace ( DokTree *tree,
                                   const gchar *name );
 DokTree *dok_tree_get_var ( DokTree *tree,
                             DokTree *context,
-                            const gchar *name );
+                            const gchar *name,
+                            DokLocation *loc );
 
 /* DokTreeDecl */
 #define DOK_TYPE_TREE_DECL (dok_tree_decl_get_type())

@@ -63,7 +63,8 @@ DokTree *dok_tree_get_decl_by_id ( DokTree *tree,
 static DokTree *dok_tree_decl_new ( DokTree *tree,
                                     DokTreeDeclType decl_type,
                                     DokTree *context,
-                                    const gchar *name )
+                                    const gchar *name,
+                                    DokLocation *loc )
 {
   DokTree *decl;
 
@@ -74,6 +75,8 @@ static DokTree *dok_tree_decl_new ( DokTree *tree,
   DOK_TREE_DECL(decl)->decl_type = decl_type;
   DOK_TREE_DECL(decl)->context = context;
   DOK_TREE_DECL(decl)->name = g_strdup(name);
+  if (loc)
+    DOK_TREE_DECL(decl)->loc = *loc;
   g_ptr_array_add(DOK_TREE_ROOT(tree)->decls, decl);
   g_hash_table_insert(DOK_TREE_ROOT(tree)->decls_id,
                       GUINT_TO_POINTER(DOK_TREE_DECL(decl)->id),
@@ -91,7 +94,7 @@ DokTree *dok_tree_get_namespace ( DokTree *tree,
 {
   ASSERT(!context); /* [TODO] */
   /* [FIXME] find existing */
-  DokTree *ns = dok_tree_decl_new(tree, DOK_TREE_DECL_NAMESPACE, context, name);
+  DokTree *ns = dok_tree_decl_new(tree, DOK_TREE_DECL_NAMESPACE, context, name, NULL);
   return ns;
 }
 
@@ -101,8 +104,9 @@ DokTree *dok_tree_get_namespace ( DokTree *tree,
  */
 DokTree *dok_tree_get_var ( DokTree *tree,
                             DokTree *context,
-                            const gchar *name )
+                            const gchar *name,
+                            DokLocation *loc )
 {
-  DokTree *var = dok_tree_decl_new(tree, DOK_TREE_DECL_VAR, context, name);
+  DokTree *var = dok_tree_decl_new(tree, DOK_TREE_DECL_VAR, context, name, loc);
   return var;
 }

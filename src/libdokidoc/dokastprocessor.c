@@ -145,7 +145,7 @@ static void enter_var_decl ( DokVisitor *v,
                              DokAST *n )
 {
   CL_TRACE("%s", dok_ast_to_string(n));
-  push(dok_tree_get_var(proc->tree, ctxt, DOK_AST_DECL_NAME(n)));
+  push(dok_tree_get_var(proc->tree, ctxt, DOK_AST_DECL_NAME(n), &DOK_AST_DECL_LOC(n)));
 }
 
 

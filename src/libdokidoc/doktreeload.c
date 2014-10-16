@@ -358,7 +358,7 @@ static void start_decl ( Loader *loader,
         DokTreeID real_id = GPOINTER_TO_UINT(g_hash_table_lookup(loader->idmap,
                                                                  GUINT_TO_POINTER(context)));
         DokTree *real_context = dok_tree_get_decl_by_id(loader->tree, real_id);
-        loader->decl = dok_tree_get_var(loader->tree, real_context, name);
+        loader->decl = dok_tree_get_var(loader->tree, real_context, name, NULL /* [FIXME] */);
         g_hash_table_insert(loader->idmap, 
                             GUINT_TO_POINTER(id),
                             GUINT_TO_POINTER(DOK_TREE_DECL(loader->decl)->id));
