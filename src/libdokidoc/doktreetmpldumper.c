@@ -20,6 +20,10 @@ static void enter_default ( DokVisitor *visitor,
                             DokTree *tree );
 static void leave_default ( DokVisitor *visitor,
                             DokTree *tree );
+static void enter_decl ( DokVisitor *visitor,
+                         DokTree *tree );
+static void leave_decl ( DokVisitor *visitor,
+                         DokTree *tree );
 
 
 
@@ -41,7 +45,7 @@ static DokVisitorClass *dok_tree_tmpl_dumper_get_class ( void )
          (DokVisitorFunc) enter_##low,                  \
          (DokVisitorFunc) leave_##low)
       /* REG(ROOT, root); */
-      /* REG(DECL, decl); */
+      REG(DECL, decl);
 #undef REG
     }
   return cls;
@@ -77,4 +81,24 @@ static void leave_default ( DokVisitor *visitor,
                             DokTree *node )
 {
   CL_TRACE("%s", dok_tree_to_string(node));
+}
+
+
+
+/* enter_decl:
+ */
+static void enter_decl ( DokVisitor *visitor,
+                         DokTree *tree )
+{
+  CL_TRACE("%s", dok_tree_to_string(tree));
+}
+
+
+
+/* leave_decl:
+ */
+static void leave_decl ( DokVisitor *visitor,
+                         DokTree *tree )
+{
+  CL_TRACE("%s", dok_tree_to_string(tree));
 }
