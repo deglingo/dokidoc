@@ -99,6 +99,51 @@ static gchar *_get_xmlpath ( DokConfig *config,
 
 
 
+/* _get_template:
+ */
+static DokTmplFile *_get_template ( DokConfig *config,
+                                    const gchar *path )
+{
+  gchar *base;
+  gchar *ext;
+  GList *l;
+  DokTmplFile *tmpl = NULL;
+  gboolean free_base = TRUE;
+  base = g_path_get_basename(path);
+  if ((ext = strrchr(base, '.')))
+    *ext = 0;
+  CL_DEBUG("get_template(%s -> %s)", path, base);
+  for (l = config->templates; l; l = l->next)
+    {
+      tmpl = l->data;
+      CL_DEBUG(" -> %p", tmpl);
+      if (!strcmp(tmpl->tmplbase, base))
+        break;
+      else
+        tmpl = NULL;
+    }
+  if (tmpl)
+    {
+      CL_DEBUG(" -> %p (%s)", tmpl, tmpl->tmplpath);
+    }
+  else
+    {
+      gchar *base_ext = g_strdup_printf("%s.tmpl", base);
+      CL_DEBUG("not found");
+      tmpl = g_new0(DokTmplFile, 1);
+      tmpl->tmplbase = base;
+      free_base = FALSE;
+      tmpl->tmplpath = g_build_filename(config->tmpldir, base_ext, NULL);
+      g_free(base_ext);
+      config->templates = g_list_append(config->templates, tmpl);
+    }
+  if (free_base)
+    g_free(base);
+  return tmpl;
+}
+
+
+
 /* _get_sources:
  */
 static void _get_sources ( DokConfig *config,
@@ -120,7 +165,7 @@ static void _get_sources ( DokConfig *config,
       if ((r = glob(pattern, GLOB_APPEND | GLOB_NOSORT, NULL, &vector)) != 0)
         CL_ERROR("glob failed: %d", r);
     }
-  /* create files */
+  /* create files and templates */
   for (n = 0; n < vector.gl_pathc; n++)
     {
       gchar *full_path = realpath(vector.gl_pathv[n], NULL);
@@ -133,6 +178,7 @@ static void _get_sources ( DokConfig *config,
       source_file->fullpath = g_strdup(full_path);
       source_file->basepath = source_file->fullpath + strlen(source_file->base->path) + 1;
       source_file->xmlpath = _get_xmlpath(config, source_file);
+      source_file->template = _get_template(config, source_file->basepath);
       config->source_files = g_list_append(config->source_files, source_file);
       free(full_path);
     }
@@ -171,6 +217,13 @@ static void parse_config ( DokConfig *config,
     ASSERT(!error);
     config->xmldir = g_strdup("xml");
   }
+  if (g_key_file_has_key(kfile, "DEFAULT", "tmpldir", &error)) {
+    config->tmpldir = g_key_file_get_string(kfile, "DEFAULT", "tmpldir", &error);
+    ASSERT(config->tmpldir);
+  } else {
+    ASSERT(!error);
+    config->tmpldir = g_strdup("tmpl");
+  }
   if (g_key_file_has_key(kfile, "DEFAULT", "filter", &error)) {
     config->filter = g_key_file_get_string(kfile, "DEFAULT", "filter", &error);
     ASSERT(config->filter);
@@ -180,6 +233,21 @@ static void parse_config ( DokConfig *config,
   }
   _get_source_bases(config, kfile);
   _get_sources(config, kfile);
+  /* debug */
+  {
+    GList *l;
+    CL_DEBUG("CONFIG:");
+    CL_DEBUG("  SOURCES: %d files", g_list_length(config->source_files));
+    for (l = config->source_files; l; l = l->next) {
+      DokSourceFile *f = l->data;
+      CL_DEBUG("    - '%s:%s' (%s -> %s)", f->base->path, f->basepath, f->fullpath, f->template->tmplpath);
+    }
+    CL_DEBUG("  TEMPLATES: %d files", g_list_length(config->templates));
+    for (l = config->templates; l; l = l->next) {
+      DokTmplFile *f = l->data;
+      CL_DEBUG("    - '%s' (%s)", f->tmplbase, f->tmplpath);
+    }
+  }
 }
 
 

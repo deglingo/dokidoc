@@ -18,6 +18,17 @@ typedef struct _DokSourceBase
 
 
 
+/* DokTmplFile:
+ */
+typedef struct _DokTmplFile
+{
+  gchar *tmplbase;
+  gchar *tmplpath;
+}
+  DokTmplFile;
+
+
+
 /* DokSourceFiler:
  */
 typedef struct _DokSourceFile
@@ -26,6 +37,7 @@ typedef struct _DokSourceFile
   gchar *fullpath;
   gchar *basepath;
   gchar *xmlpath;
+  DokTmplFile *template;
 }
   DokSourceFile;
 
@@ -36,8 +48,10 @@ typedef struct _DokSourceFile
 typedef struct _DokConfig
 {
   gchar *xmldir;
+  gchar *tmpldir;
   GList *source_bases;
   GList *source_files;
+  GList *templates;
   gchar *filter;
 }
   DokConfig;
