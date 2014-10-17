@@ -23,12 +23,12 @@ static GPid popen_filter ( DokConfig *config,
   gchar *argv[] =
     {
       NULL,
-      NULL,
       "read",
+      NULL,
       NULL,
     };
   argv[0] = config->filter;
-  argv[1] = tmplpath;
+  argv[2] = tmplpath;
   CL_DEBUG("popen_filter: '%s' '%s'", config->filter, tmplpath);
   r = g_spawn_async_with_pipes
     (NULL,
