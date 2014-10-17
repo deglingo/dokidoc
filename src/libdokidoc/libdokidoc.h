@@ -31,5 +31,7 @@
 
 #include "libdokidoc/doktreeload.h"
 
+#include "libdokidoc/doktemplate.h"
+
 
 #endif
