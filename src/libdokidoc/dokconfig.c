@@ -157,11 +157,26 @@ static void parse_config ( DokConfig *config,
   CL_DEBUG("reading config file: '%s'", cfgfile);
   kfile = g_key_file_new();
   g_key_file_set_list_separator(kfile, ',');
+  /* defaults */
+  g_key_file_set_string(kfile, "DEFAULT", "xmldir", "xml");
+  g_key_file_set_string(kfile, "DEFAULT", "filter", "dokidoc-filter");
+  /* load */
   if (!g_key_file_load_from_file(kfile, cfgfile, 0, &error))
     CL_ERROR("error in config file: %s", error->message);
   /* get params */
-  if (!(config->xmldir = g_key_file_get_string(kfile, "DEFAULT", "xmldir", &error))) {
+  if (g_key_file_has_key(kfile, "DEFAULT", "xmldir", &error)) {
+    config->xmldir = g_key_file_get_string(kfile, "DEFAULT", "xmldir", &error);
+    ASSERT(config->xmldir);
+  } else {
+    ASSERT(!error);
     config->xmldir = g_strdup("xml");
+  }
+  if (g_key_file_has_key(kfile, "DEFAULT", "filter", &error)) {
+    config->filter = g_key_file_get_string(kfile, "DEFAULT", "filter", &error);
+    ASSERT(config->filter);
+  } else {
+    ASSERT(!error);
+    config->filter = g_strdup("dokidoc-filter");
   }
   _get_source_bases(config, kfile);
   _get_sources(config, kfile);

@@ -38,6 +38,7 @@ typedef struct _DokConfig
   gchar *xmldir;
   GList *source_bases;
   GList *source_files;
+  gchar *filter;
 }
   DokConfig;
 

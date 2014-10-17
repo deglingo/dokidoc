@@ -1,5 +1,7 @@
 #
 [DEFAULT]
 
+filter = @top_builddir@/src/dokidoc-filter/dokidoc-filter
+
 source_bases = @top_srcdir@/test
 sources = @top_srcdir@/test/source1.h
