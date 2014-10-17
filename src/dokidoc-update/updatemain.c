@@ -10,7 +10,16 @@
  */
 static void process ( DokConfig *config )
 {
-  CL_DEBUG("[TODO]");
+  DokTree *tree;
+  GList *l;
+  /* load xml */
+  tree = dok_tree_root_new();
+  for (l = config->source_files; l; l = l->next)
+    {
+      DokSourceFile *src = l->data;
+      if (!dok_tree_load(tree, src->xmlpath))
+        CL_ERROR("could not load dok tree: '%s'", src->xmlpath);
+    }
 }
 
 
