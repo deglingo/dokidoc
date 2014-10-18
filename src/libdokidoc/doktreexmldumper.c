@@ -123,18 +123,23 @@ static void leave_root ( DokVisitor *visitor,
 static void enter_decl ( DokVisitor *visitor,
                          DokTree *tree )
 {
-  gchar *type_name, *id, *context;
+  gchar *type_name, *id, *context, *lineno;
   push(xmlNewChild(ctxt, NULL, BAD_CAST "decl", NULL));
   type_name = g_strdup_printf("%d", DOK_TREE_DECL(tree)->decl_type); /* [fixme] */
   id = g_strdup_printf("%d", DOK_TREE_DECL(tree)->id);
   context = g_strdup_printf("%d", DOK_TREE_DECL(tree)->context ? DOK_TREE_DECL(DOK_TREE_DECL(tree)->context)->id : 0);
+  lineno = g_strdup_printf("%d", DOK_TREE_DECL(tree)->loc.lineno);
   xmlNewProp(ctxt, BAD_CAST "id", BAD_CAST id);
   xmlNewProp(ctxt, BAD_CAST "context", BAD_CAST context);
   xmlNewProp(ctxt, BAD_CAST "name", BAD_CAST DOK_TREE_DECL(tree)->name);
   xmlNewProp(ctxt, BAD_CAST "type", BAD_CAST type_name);
+  xmlNewProp(ctxt, BAD_CAST "filename",
+             BAD_CAST g_quark_to_string(DOK_TREE_DECL(tree)->loc.qfile));
+  xmlNewProp(ctxt, BAD_CAST "lineno", BAD_CAST lineno);
   g_free(type_name);
   g_free(id);
   g_free(context);
+  g_free(lineno);
 }
 
 

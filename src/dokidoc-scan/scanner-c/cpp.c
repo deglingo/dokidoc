@@ -31,6 +31,15 @@ CPP *cpp_new ( const gchar *filename )
 
 
 
+/* cpp_get_qfile:
+ */
+GQuark cpp_get_qfile ( CPP *cpp )
+{
+  return lexer_get_qfile(cpp->lexer);
+}
+
+
+
 /* _parse_directive:
  */
 static void _parse_directive ( CPP *cpp )

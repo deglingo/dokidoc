@@ -13,6 +13,12 @@
 %locations
 %parse-param { DokScanner *scanner }
 %lex-param { DokScanner *scanner }
+/* %initial-action */
+/* { */
+/*   @$.qfile = @$.end_qfile = get_qfile(scanner); */
+/*   @$.lineno = @$.end_lineno = 1; */
+/*   @$.charno = @$.end_charno = 0; */
+/* } */
 
 %token TOK_STATIC TOK_INLINE TOK_VOID TOK_STRUCT TOK_UNION TOK_ENUM TOK_CONST TOK_TYPEDEF
 %token TOK_IDENT TOK_INT TOK_STRING TOK_ELLIPSIS
@@ -50,13 +56,18 @@ decl
   ;
 
 decl_specs
-  : storage_qual_spec_list type_spec    { $$ = fix_type($2, $1); }
+  : type_spec                           { $$ = fix_type($1, NULL); }
+  | storage_qual_spec_list type_spec    { $$ = fix_type($2, $1); }
   ;
 
 storage_qual_spec_list
-  : /* empty */                            { $$ = NULL; }
-  | storage_spec storage_qual_spec_list    { $$ = dok_ast_list_prepend($2, $1); }
-  | qual_spec storage_qual_spec_list       { $$ = dok_ast_list_prepend($2, $1); }
+  : storage_or_qual_spec                           { $$ = dok_ast_list_prepend(NULL, $1); }
+  | storage_or_qual_spec storage_qual_spec_list    { $$ = dok_ast_list_prepend($2, $1); }
+  ;
+
+storage_or_qual_spec
+  : storage_spec
+  | qual_spec
   ;
 
 storage_spec

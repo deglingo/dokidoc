@@ -142,6 +142,15 @@ void yyerror ( DokLocation *locp,
 
 
 
+/* get_qfile:
+ */
+GQuark get_qfile ( DokScanner *scanner )
+{
+  return cpp_get_qfile(((DokScannerC *) scanner)->cpp);
+}
+
+
+
 /* eat_function_body:
  */
 void eat_function_body ( DokScanner *scanner )
@@ -179,6 +188,7 @@ DokAST *collect_decls ( DokScanner *scanner,
   CL_DEBUG("COLLECT DECLS:");
   CL_DEBUG("  TYPE: %s", dok_ast_to_string(type));
   CL_DEBUG("  DECLARATORS: %s", dok_ast_to_string(declarators));
+  CL_DEBUG("  LOCATION: '%s' %d", g_quark_to_string(loc->qfile), loc->lineno);
   for (l = declarators; l; l = DOK_AST_LIST_NEXT(l))
     {
       DokAST *item = DOK_AST_LIST_ITEM(l);

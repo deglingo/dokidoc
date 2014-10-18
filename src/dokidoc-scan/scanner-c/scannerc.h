@@ -27,22 +27,27 @@ enum
 #define YYLTYPE DokLocation
 
 /* [fixme] how to handle filename ? */
-#define YYLLOC_DEFAULT(cur, rhs, n) do {                    \
-    if (n) {                                                \
-      (cur).qfile = YYRHSLOC(rhs, 1).qfile;                 \
-      (cur).lineno = YYRHSLOC(rhs, 1).lineno;               \
-      (cur).charno = YYRHSLOC(rhs, 1).charno;               \
-      (cur).end_qfile = YYRHSLOC(rhs, n).end_qfile;         \
-      (cur).end_lineno = YYRHSLOC(rhs, n).end_lineno;       \
-      (cur).end_charno = YYRHSLOC(rhs, n).end_charno;       \
-    } else {                                                \
-      (cur).qfile = (cur).end_qfile =                       \
-        YYRHSLOC(rhs, 0).end_qfile;                         \
-      (cur).lineno = (cur).end_lineno =                     \
-        YYRHSLOC(rhs, 0).end_lineno;                        \
-      (cur).charno = (cur).end_charno =                     \
-        YYRHSLOC(rhs, 0).end_charno;                        \
-    }                                                       \
+#define YYLLOC_DEFAULT(cur, rhs, n) do {                \
+    if (n) {                                            \
+      (cur).qfile = YYRHSLOC(rhs, 1).qfile;             \
+      (cur).lineno = YYRHSLOC(rhs, 1).lineno;           \
+      (cur).charno = YYRHSLOC(rhs, 1).charno;           \
+      (cur).end_qfile = YYRHSLOC(rhs, n).end_qfile;     \
+      (cur).end_lineno = YYRHSLOC(rhs, n).end_lineno;   \
+      (cur).end_charno = YYRHSLOC(rhs, n).end_charno;   \
+    } else {                                            \
+      (cur).qfile = (cur).end_qfile =                   \
+        YYRHSLOC(rhs, 0).end_qfile;                     \
+      (cur).lineno = (cur).end_lineno =                 \
+        YYRHSLOC(rhs, 0).end_lineno;                    \
+      (cur).charno = (cur).end_charno =                 \
+        YYRHSLOC(rhs, 0).end_charno;                    \
+    }                                                   \
+    CL_DEBUG("YYLOC (%d): '%s' %d -> '%s' %d", (n),     \
+             g_quark_to_string((cur).qfile),            \
+             (cur).lineno,                              \
+             g_quark_to_string((cur).end_qfile),        \
+             (cur).end_lineno);                         \
   } while (0)
 
 int yyparse ( DokScanner *scanner );
@@ -53,6 +58,7 @@ void yyerror ( DokLocation *locp,
                DokScanner *scanner,
                char const * );
 
+GQuark get_qfile ( DokScanner *scanner );
 void eat_function_body ( DokScanner *scanner );
 DokAST *collect_decls ( DokScanner *scanner,
                         DokAST *type_specs,

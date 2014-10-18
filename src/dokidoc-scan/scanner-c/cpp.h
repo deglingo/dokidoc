@@ -13,6 +13,7 @@ typedef struct _CPP CPP;
 
 
 CPP *cpp_new ( const gchar *filename );
+GQuark cpp_get_qfile ( CPP *cpp );
 Token *cpp_lex ( CPP *cpp,
                  DokLocation *loc );
 void cpp_unlex ( CPP *cpp,

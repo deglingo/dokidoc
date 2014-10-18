@@ -14,8 +14,8 @@
 typedef enum _LexerState
   {
     LEXER_STATE_NORMAL = 0,
-    LEXER_STATE_COMMENT,
     LEXER_STATE_INCLUDE,
+    LEXER_STATE_COMMENT,
   }
   LexerState;
 
@@ -39,11 +39,11 @@ typedef struct _LexRule
 static LexRule LEX_RULES[] =
   {
     { TOK_C_COMMENT_START, "^/\\*", },
-    { TOK_C_COMMENT_END, "^([^\\\\]|(\\\\.))*?\\*/", LEXER_STATE_COMMENT, },
-    { TOK_C_COMMENT_CONT, "^([^\\\\]|(\\\\.))*", LEXER_STATE_COMMENT, },
+    { TOK_C_COMMENT_END, "^([^\\\\]|(\\\\.))*\\*/", LEXER_STATE_COMMENT, },
+    { TOK_C_COMMENT_CONT, "^.*", LEXER_STATE_COMMENT, },
     { TOK_INCLUDE, "^[ \t]*((\"[^\"]+\")|(<[^>]+>))[ \t]*", LEXER_STATE_INCLUDE, },
     { TOK_NL, "^\\n", },
-    { TOK_SPACE, "^[ \t]+", },
+    { TOK_SPACE, "^([ \t]+)|([ \t]*\\\\\\n)", },
     { TOK_SHARP, "^#", },
     { TOK_IDENT, "^[a-zA-Z_][a-zA-Z0-9_]*", },
     { TOK_INT, "^[0-9]+", },
@@ -85,9 +85,7 @@ struct _Lexer
   FILE *f;
   GString *buffer;
   gint lineno;
-  gint next_lineno;
   gsize charno;
-  gboolean in_comment;
   GString *comment;
   LexerState state;
 };
@@ -173,7 +171,6 @@ Lexer *lexer_new ( const gchar *filename )
   lexer->filename = g_strdup(path);
   free(path);
   lexer->qfilename = g_quark_from_string(lexer->filename);
-  lexer->next_lineno = 1;
   if (!(lexer->f = fopen(filename, "r")))
     CL_ERROR("could not open file: '%s'", filename);
   lexer->buffer = g_string_new("");
@@ -183,14 +180,25 @@ Lexer *lexer_new ( const gchar *filename )
 
 
 
+/* lexer_get_qfile:
+ */
+GQuark lexer_get_qfile ( Lexer *lexer )
+{
+  return lexer->qfilename;
+}
+
+
+
 /* _feed_buffer:
  */
 static gboolean _feed_buffer ( Lexer *lexer )
 {
   gint c;
+  if (lexer->charno < lexer->buffer->len)
+    return TRUE;
   g_string_truncate(lexer->buffer, 0);
   lexer->charno = 0;
-  lexer->lineno = lexer->next_lineno;
+  lexer->lineno++;
   while (1)
     {
       c = fgetc(lexer->f);
@@ -211,26 +219,43 @@ static gboolean _feed_buffer ( Lexer *lexer )
         }
       else if (c == '\n')
         {
-          lexer->next_lineno++;
+          CL_DEBUG("FEED: %d: '%s'", lexer->lineno, lexer->buffer->str);
           g_string_append_c(lexer->buffer, '\n');
           return TRUE;
-        }
-      else if (c == '\\')
-        {
-          c = fgetc(lexer->f);
-          if (c == EOF) {
-            CL_ERROR("[TODO]");
-          } else if (c == '\n') {
-            lexer->next_lineno++;
-            g_string_append_c(lexer->buffer, ' ');
-          } else {
-            g_string_append_c(lexer->buffer, '\\');
-            g_string_append_c(lexer->buffer, c);
-          }
         }
       else
         {
           g_string_append_c(lexer->buffer, c);
+        }
+    }
+}
+
+
+
+/* eat_c_comment:
+ */
+static Token *eat_c_comment ( Lexer *lexer )
+{
+  LexRule *rule;
+  gint tok_len;
+  while (1)
+    {
+      if (!_feed_buffer(lexer))
+        CL_ERROR("EOF in comment");
+      rule = lex_rule_match(LEXER_STATE_COMMENT,
+                            lexer->buffer->str,
+                            lexer->buffer->len - lexer->charno,
+                            &tok_len);
+      ASSERT(rule);
+      g_string_append_len(lexer->comment, lexer->buffer->str + lexer->charno, tok_len);
+      lexer->charno += tok_len;
+      if (rule->token == TOK_C_COMMENT_END)
+        {
+          g_string_truncate(lexer->comment, lexer->comment->len - 2);
+          gchar *str = g_strstrip(lexer->comment->str);
+          Token *tok = token_new(TOK_COMMENT, str, strlen(str));
+          g_string_truncate(lexer->comment, 0);
+          return tok;
         }
     }
 }
@@ -244,55 +269,48 @@ Token *lexer_lex ( Lexer *lexer,
 {
   LexRule *rule;
   gint tok_len;
-  gchar *buf;
   Token *tok;
-  /* [fixme] */
-  memset(loc, 0, sizeof(DokLocation));
-  while (1)
+  /* feed the line buffer */
+  if (!_feed_buffer(lexer))
     {
-      gint charno;
-      /* feed the line buffer */
-      while (lexer->charno >= lexer->buffer->len)
-        if (!_feed_buffer(lexer))
-          {
-            ASSERT(lexer->state == LEXER_STATE_NORMAL);
-            return NULL;
-          }
-      /* match rule */
-      if (!(rule = lex_rule_match(lexer->state,
-                                  lexer->buffer->str + lexer->charno,
-                                  lexer->buffer->len - lexer->charno,
-                                  &tok_len)))
-        {
-          CL_ERROR("no match: `%s' (state=%d)", lexer->buffer->str + lexer->charno, lexer->state);
-        }
-      charno = lexer->charno;
-      buf = lexer->buffer->str + lexer->charno;
-      lexer->charno += tok_len;
-      switch (rule->token)
-        {
-        case TOK_C_COMMENT_START:
-          g_string_append_len(lexer->comment, buf, tok_len);
-          lexer->state = LEXER_STATE_COMMENT;
-          continue;
-        case TOK_C_COMMENT_CONT:
-          g_string_append_len(lexer->comment, buf, tok_len);
-          continue;
-        case TOK_C_COMMENT_END:
-          g_string_append_len(lexer->comment, buf, tok_len);
-          tok = token_new(TOK_COMMENT, lexer->comment->str, lexer->comment->len);
-          g_string_truncate(lexer->comment, 0);
-          lexer->state = LEXER_STATE_NORMAL;
-          return tok;
-        default:
-          loc->qfile = loc->end_qfile = lexer->qfilename;
-          loc->lineno = loc->end_lineno = lexer->lineno;
-          loc->charno = charno;
-          loc->end_charno = lexer->charno - 1;
-          tok = token_new(rule->token, buf, tok_len);
-          return tok;
-        }
+      ASSERT(lexer->state == LEXER_STATE_NORMAL);
+      CL_DEBUG("LEX: EOF");
+      /* ?? */
+      loc->qfile = loc->end_qfile = lexer->qfilename;
+      loc->lineno = loc->end_lineno = lexer->lineno;
+      loc->charno = loc->end_charno = lexer->charno; /* -1 ? */
+      return NULL;
     }
+  /* loc start */
+  loc->qfile = lexer->qfilename;
+  loc->lineno = lexer->lineno;
+  loc->charno = lexer->charno;
+  /* match rule */
+  if (!(rule = lex_rule_match(lexer->state,
+                              lexer->buffer->str + lexer->charno,
+                              lexer->buffer->len - lexer->charno,
+                              &tok_len)))
+    {
+      CL_ERROR("no match: `%s' (state=%d)", lexer->buffer->str + lexer->charno, lexer->state);
+    }
+  lexer->charno += tok_len;
+  switch (rule->token)
+    {
+    case TOK_C_COMMENT_START:
+      tok = eat_c_comment(lexer);
+      break;
+    default:
+      tok = token_new(rule->token, lexer->buffer->str + loc->charno, tok_len);
+      break;
+    }
+  loc->end_qfile = lexer->qfilename;
+  loc->end_lineno = lexer->lineno;
+  loc->end_charno = lexer->charno; /* -1 ? */
+  fprintf(stderr, "LEX:%s:%d: TOKEN <%d> \"%s\" (%s:%d)\n",
+          g_quark_to_string(loc->qfile), loc->lineno,
+          tok->type, tok->value,
+          g_quark_to_string(loc->end_qfile), loc->end_lineno);
+  return tok;
 }
 
 

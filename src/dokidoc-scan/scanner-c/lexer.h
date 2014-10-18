@@ -13,6 +13,7 @@ typedef struct _Lexer Lexer;
 
 
 Lexer *lexer_new ( const gchar *filename );
+GQuark lexer_get_qfile ( Lexer *lexer );
 Token *lexer_lex ( Lexer *lexer,
                    DokLocation *loc );
 Token *lexer_lex_include ( Lexer *lexer,
