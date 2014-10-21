@@ -7,6 +7,7 @@
 
 
 static gpointer get_node_type ( gpointer node );
+static gpointer get_parent_type ( gpointer type );
 
 static void accept_default ( DokVisitor *v,
                              DokTree *n );
@@ -24,6 +25,7 @@ DokVisitorClass *dok_tree_visitor_class_new ( void )
   DokVisitorClass *cls;
   cls = dok_visitor_class_new();
   cls->get_node_type = get_node_type;
+  cls->get_parent_type = get_parent_type;
   cls->accept_default = (DokVisitorFunc) accept_default;
 #define REG(tp, name) dok_visitor_class_register_funcs  \
     (cls,                                               \
@@ -48,6 +50,15 @@ static gpointer get_node_type ( gpointer node )
 
 
 
+/* get_parent_type:
+ */
+static gpointer get_parent_type ( gpointer type )
+{
+  return GUINT_TO_POINTER(dok_type_get_parent(GPOINTER_TO_UINT(type)));
+}
+
+
+
 /* accept_default:
  */
 static void accept_default ( DokVisitor *v,
@@ -63,9 +74,10 @@ static void accept_default ( DokVisitor *v,
 static void accept_root ( DokVisitor *v,
                           DokTree *n )
 {
-  guint i;
-  for (i = 0; i < DOK_TREE_ROOT(n)->decls->len; i++)
-    dok_visitor_visit(v, DOK_TREE_ROOT(n)->decls->pdata[i]);
+  GList *l;
+  for (l = DOK_TREE_ROOT(n)->files; l; l = l->next)
+    dok_visitor_visit(v, l->data);
+  dok_visitor_visit(v, DOK_TREE_ROOT(n)->nsroot);
 }
 
 
@@ -75,4 +87,9 @@ static void accept_root ( DokVisitor *v,
 static void accept_decl ( DokVisitor *v,
                           DokTree *n )
 {
+  GList *l;
+  for (l = DOK_TREE_DECL(n)->locations; l; l = l->next)
+    dok_visitor_visit(v, l->data);
+  for (l = DOK_TREE_DECL(n)->members; l; l = l->next)
+    dok_visitor_visit(v, l->data);
 }

@@ -179,6 +179,7 @@ static void _get_sources ( DokConfig *config,
       source_file->basepath = source_file->fullpath + strlen(source_file->base->path) + 1;
       source_file->xmlpath = _get_xmlpath(config, source_file);
       source_file->template = _get_template(config, source_file->basepath);
+      source_file->template->sources = g_list_append(source_file->template->sources, source_file);
       config->source_files = g_list_append(config->source_files, source_file);
       free(full_path);
     }

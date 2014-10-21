@@ -4,6 +4,8 @@
 TOP_SRCDIR='@abs_top_srcdir@'
 TOP_BUILDDIR='@abs_top_builddir@'
 
+TMPLDIR="$TOP_SRCDIR/test/tmpl"
+
 #DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/.libs/lt-dokidoc-scan"
 DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
 DOKIDOC_UPDATE="$TOP_BUILDDIR/src/dokidoc-update/dokidoc-update"
@@ -26,8 +28,11 @@ export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
 #     --gen-suppressions=all \
 #     "$DOKIDOC_SCAN" dokidoc-test-scan.conf
 
-"$DOKIDOC_SCAN" dokidoc-test-scan.conf
+"$DOKIDOC_SCAN" dokidoc-test-scan.conf || exit 1
 
-"$DOKIDOC_UPDATE" dokidoc-test-scan.conf
+# [FIXME]
+test -d "$TMPLDIR" || mkdir -vp "$TMPLDIR"
+
+"$DOKIDOC_UPDATE" dokidoc-test-scan.conf || exit 1
 
 # "$DOKIDOC_UPDATE" -i source1.xml

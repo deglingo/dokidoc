@@ -61,6 +61,7 @@ const gchar *dok_type_name ( DokType type );
 DokType dok_type_from_name ( const gchar *name );
 gboolean dok_type_isa ( DokType type1,
                         DokType type2 );
+DokType dok_type_get_parent ( DokType type );
 
 DokTypeInstance *dok_type_instance_new ( DokType type );
 gpointer dok_type_instance_cast ( gpointer obj,

@@ -7,6 +7,7 @@
 
 
 static gpointer get_node_type ( gpointer node );
+static gpointer get_parent_type ( gpointer type );
 
 static void accept_list ( DokVisitor *v,
                           DokAST *n );
@@ -26,6 +27,7 @@ DokVisitorClass *dok_ast_visitor_class_new ( void )
   DokVisitorClass *cls;
   cls = dok_visitor_class_new();
   cls->get_node_type = get_node_type;
+  cls->get_parent_type = get_parent_type;
 #define REG(tp, name) dok_visitor_class_register_funcs  \
     (cls,                                               \
      GUINT_TO_POINTER(tp),                              \
@@ -47,6 +49,15 @@ DokVisitorClass *dok_ast_visitor_class_new ( void )
 static gpointer get_node_type ( gpointer node )
 {
   return GUINT_TO_POINTER(((DokAST *) node)->type);
+}
+
+
+
+/* get_parent_type:
+ */
+static gpointer get_parent_type ( gpointer type )
+{
+  return GUINT_TO_POINTER(dok_ast_type_parent(GPOINTER_TO_UINT(type)));
 }
 
 

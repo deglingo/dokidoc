@@ -6,6 +6,11 @@
 
 
 
+/* [FIXME] 22 for 64bits */
+#define MAX_INT_CHARS 32
+
+
+
 /* DokTreeXmlDumper:
  */
 typedef struct _DokTreeXmlDumper
@@ -25,10 +30,22 @@ static void enter_root ( DokVisitor *visitor,
                          DokTree *tree );
 static void leave_root ( DokVisitor *visitor,
                          DokTree *tree );
-static void enter_decl ( DokVisitor *visitor,
+static void enter_loc ( DokVisitor *visitor,
+                        DokTree *tree );
+static void leave_loc ( DokVisitor *visitor,
+                        DokTree *tree );
+static void enter_file ( DokVisitor *visitor,
                          DokTree *tree );
-static void leave_decl ( DokVisitor *visitor,
+static void leave_file ( DokVisitor *visitor,
                          DokTree *tree );
+static void enter_namespace ( DokVisitor *visitor,
+                              DokTree *tree );
+static void leave_namespace ( DokVisitor *visitor,
+                              DokTree *tree );
+static void enter_var ( DokVisitor *visitor,
+                        DokTree *tree );
+static void leave_var ( DokVisitor *visitor,
+                        DokTree *tree );
 
 
 
@@ -49,7 +66,10 @@ static DokVisitorClass *dok_tree_xml_dumper_get_class ( void )
          (DokVisitorFunc) enter_##low,                  \
          (DokVisitorFunc) leave_##low)
       REG(ROOT, root);
-      REG(DECL, decl);
+      REG(LOC, loc);
+      REG(FILE, file);
+      REG(NAMESPACE, namespace);
+      REG(VAR, var);
 #undef REG
     }
   return cls;
@@ -90,7 +110,7 @@ xmlNodePtr dok_tree_xml_dumper_get_root ( DokVisitor *visitor )
 static void enter_default ( DokVisitor *visitor,
                             gpointer node )
 {
-  CL_DEBUG("[TODO] enter(%s)", dok_tree_to_string(node));
+  CL_ERROR("[TODO] enter(%s)", dok_tree_to_string(node));
 }
 
 
@@ -101,7 +121,6 @@ static void enter_root ( DokVisitor *visitor,
                          DokTree *tree )
 {
   ASSERT(!proc->root);
-  CL_TRACE("%p", tree);
   proc->root = xmlNewNode(NULL, BAD_CAST "root");
   push(proc->root);
 }
@@ -118,36 +137,115 @@ static void leave_root ( DokVisitor *visitor,
 
 
 
+/* enter_loc:
+ */
+static void enter_loc ( DokVisitor *visitor,
+                        DokTree *tree )
+{
+  gchar *lineno, *fid;
+  DOK_APRINTF(&lineno, "%d", DOK_TREE_LOC_LINENO(tree));
+  DOK_APRINTF(&fid, "%d", DOK_TREE_ITEM_ID(DOK_TREE_LOC_FILE(tree)));
+  push(xmlNewChild(ctxt, NULL, BAD_CAST "location", NULL));
+  xmlNewProp(ctxt, BAD_CAST "file", BAD_CAST fid);
+  xmlNewProp(ctxt, BAD_CAST "lineno", BAD_CAST lineno);
+  xmlNewProp(ctxt, BAD_CAST "isdef", BAD_CAST (DOK_TREE_LOC_ISDEF(tree) ? "1" : "0"));
+}
+
+
+
+/* leave_loc:
+ */
+static void leave_loc ( DokVisitor *visitor,
+                        DokTree *tree )
+{
+  pop();
+}
+
+
+
+/* enter_item:
+ */
+static void enter_item ( DokVisitor *visitor,
+                         DokTree *tree )
+{
+  gchar *id;
+  DOK_APRINTF(&id, "%d", DOK_TREE_ITEM_ID(tree));
+  xmlNewProp(ctxt, BAD_CAST "name", BAD_CAST DOK_TREE_ITEM_NAME(tree));
+  xmlNewProp(ctxt, BAD_CAST "id", BAD_CAST id);
+}
+
+
+
+/* enter_file:
+ */
+static void enter_file ( DokVisitor *visitor,
+                         DokTree *tree )
+{
+  push(xmlNewChild(ctxt, NULL, BAD_CAST "file", NULL));
+  enter_item(visitor, tree);
+}
+
+
+
+/* leave_file:
+ */
+static void leave_file ( DokVisitor *visitor,
+                         DokTree *tree )
+{
+  pop();
+}
+
+
+
 /* enter_decl:
  */
 static void enter_decl ( DokVisitor *visitor,
                          DokTree *tree )
 {
-  gchar *type_name, *id, *context, *lineno;
-  push(xmlNewChild(ctxt, NULL, BAD_CAST "decl", NULL));
-  type_name = g_strdup_printf("%d", DOK_TREE_DECL(tree)->decl_type); /* [fixme] */
-  id = g_strdup_printf("%d", DOK_TREE_DECL(tree)->id);
-  context = g_strdup_printf("%d", DOK_TREE_DECL(tree)->context ? DOK_TREE_DECL(DOK_TREE_DECL(tree)->context)->id : 0);
-  lineno = g_strdup_printf("%d", DOK_TREE_DECL(tree)->loc.lineno);
-  xmlNewProp(ctxt, BAD_CAST "id", BAD_CAST id);
+  gchar *context;
+  enter_item(visitor, tree);
+  DOK_APRINTF(&context, "%d", DOK_TREE_DECL_CONTEXT_ID(tree));
   xmlNewProp(ctxt, BAD_CAST "context", BAD_CAST context);
-  xmlNewProp(ctxt, BAD_CAST "name", BAD_CAST DOK_TREE_DECL(tree)->name);
-  xmlNewProp(ctxt, BAD_CAST "type", BAD_CAST type_name);
-  xmlNewProp(ctxt, BAD_CAST "filename",
-             BAD_CAST g_quark_to_string(DOK_TREE_DECL(tree)->loc.qfile));
-  xmlNewProp(ctxt, BAD_CAST "lineno", BAD_CAST lineno);
-  g_free(type_name);
-  g_free(id);
-  g_free(context);
-  g_free(lineno);
 }
 
 
 
-/* leave_decl:
+/* enter_namespace:
  */
-static void leave_decl ( DokVisitor *visitor,
-                         DokTree *tree )
+static void enter_namespace ( DokVisitor *visitor,
+                              DokTree *tree )
+{
+  push(xmlNewChild(proc->root, NULL, BAD_CAST "namespace", NULL));
+  enter_decl(visitor, tree);
+}
+
+
+
+/* leave_namespace:
+ */
+static void leave_namespace ( DokVisitor *visitor,
+                              DokTree *tree )
+{
+  pop();
+}
+
+
+
+/* enter_var:
+ */
+static void enter_var ( DokVisitor *visitor,
+                        DokTree *tree )
+{
+  push(xmlNewChild(proc->root, NULL, BAD_CAST "var", NULL));
+  enter_decl(visitor, tree);  
+}
+
+
+
+/* leave_var:
+ */
+static void leave_var ( DokVisitor *visitor,
+                        DokTree *tree )
 {
   pop();
 }

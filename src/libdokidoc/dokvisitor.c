@@ -4,6 +4,8 @@
 #include "libdokidoc/private.h"
 #include "libdokidoc/dokvisitor.h"
 
+#include <string.h>
+
 
 
 /* DokVisitorFuncs:
@@ -54,6 +56,39 @@ void dok_visitor_class_register_funcs ( DokVisitorClass *cls,
 
 
 
+static void lookup_funcs ( DokVisitorClass *cls,
+                           gpointer node_type,
+                           DokVisitorFuncs *funcs )
+{
+  gpointer type = node_type;
+  memset(funcs, 0, sizeof(DokVisitorFuncs));
+  while (type)
+    {
+      DokVisitorFuncs *f;
+      if ((f = g_hash_table_lookup(cls->table, type)))
+        {
+          if ((!funcs->accept) && f->accept)
+            funcs->accept = f->accept;
+          if ((!funcs->enter) && f->enter)
+            funcs->enter = f->enter;
+          if ((!funcs->leave) && f->leave)
+            funcs->leave = f->leave;
+          if (funcs->accept && funcs->enter && funcs->leave)
+            break;
+        }
+      ASSERT(cls->get_parent_type);
+      type = cls->get_parent_type(type);
+    }
+  if (!funcs->accept)
+    funcs->accept = cls->accept_default;
+  if (!funcs->enter)
+    funcs->enter = cls->enter_default;
+  if (!funcs->leave)
+    funcs->leave = cls->leave_default;
+}
+
+
+
 /* dok_visitor_new:
  */
 DokVisitor *dok_visitor_new ( DokVisitorClass *cls )
@@ -74,26 +109,20 @@ void dok_visitor_visit ( DokVisitor *visitor,
 {
   DokVisitorClass *cls = visitor->dok_visitor_class;
   gpointer node_type;
-  DokVisitorFuncs *funcs;
+  DokVisitorFuncs funcs;
   if (!node)
     /* [FIXME] cls->enter/leave_null() */
     return;
   ASSERT(cls->get_node_type);
   node_type = cls->get_node_type(node);
-  funcs = g_hash_table_lookup(cls->table, node_type);
+  lookup_funcs(cls, node_type, &funcs);
   /* enter */
-  if (funcs && funcs->enter)
-    funcs->enter(visitor, node);
-  else if (cls->enter_default)
-    cls->enter_default(visitor, node);
+  if (funcs.enter)
+    funcs.enter(visitor, node);
   /* accept */
-  if (funcs && funcs->accept)
-    funcs->accept(visitor, node);
-  else if (cls->accept_default)
-    cls->accept_default(visitor, node);
+  if (funcs.accept)
+    funcs.accept(visitor, node);
   /* leave */
-  if (funcs && funcs->leave)
-    funcs->leave(visitor, node);
-  else if (cls->leave_default)
-    cls->leave_default(visitor, node);
+  if (funcs.leave)
+    funcs.leave(visitor, node);
 }

@@ -24,6 +24,7 @@ typedef struct _DokTmplFile
 {
   gchar *tmplbase;
   gchar *tmplpath;
+  GList *sources;
 }
   DokTmplFile;
 

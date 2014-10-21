@@ -4,6 +4,8 @@
 #include "libdokidoc/private.h"
 #include "libdokidoc/dokastprocessor.h"
 
+#include <string.h>
+
 
 
 /* DokASTProcessor:
@@ -71,22 +73,13 @@ static DokVisitorClass *dok_ast_processor_get_class ( void )
 
 /* dok_ast_processor_new:
  */
-DokVisitor *dok_ast_processor_new ( void )
+DokVisitor *dok_ast_processor_new ( DokTree *tree )
 {
   DokVisitor *v = dok_visitor_new(dok_ast_processor_get_class());
   DokASTProcessor *p = (DokASTProcessor *) v;
-  p->tree = dok_tree_root_new();
+  p->tree = tree;
   p->context = g_slist_prepend(NULL, p->tree);
   return v;
-}
-
-
-
-/* dok_ast_processor_get_tree:
- */
-DokTree *dok_ast_processor_get_tree ( DokVisitor *processor )
-{
-  return ((DokASTProcessor *) processor)->tree;
 }
 
 
@@ -122,8 +115,14 @@ static void leave_list ( DokVisitor *v,
 static void enter_namespace ( DokVisitor *v,
                               DokAST *n )
 {
+  DokTree *tree;
   CL_TRACE("%s", dok_ast_to_string(n));
-  push(dok_tree_get_namespace(proc->tree, NULL /* [fixme] ctxt */, "" /* [fixme] name */));
+  /* [TODO] check context and handler 'normal' namespaces */
+  ASSERT(!strcmp(DOK_AST_DECL_NAME(n), ""));
+  ASSERT(DOK_IS_TREE_ROOT(ctxt));
+  tree = dok_tree_root_get_root_namespace(ctxt);
+  /* [TODO] location */
+  push(tree);
 }
 
 
@@ -144,8 +143,19 @@ static void leave_namespace ( DokVisitor *v,
 static void enter_var_decl ( DokVisitor *v,
                              DokAST *n )
 {
+  DokTree *tree;
   CL_TRACE("%s", dok_ast_to_string(n));
-  push(dok_tree_get_var(proc->tree, ctxt, DOK_AST_DECL_NAME(n), &DOK_AST_DECL_LOC(n)));
+  if ((tree = dok_tree_decl_get_var(ctxt, DOK_AST_DECL_NAME(n))))
+    {
+      CL_ERROR("[TODO] ??");
+    }
+  else
+    {
+      CL_DEBUG("new var: '%s'", DOK_AST_DECL_NAME(n));
+      tree = dok_tree_var_new(ctxt, DOK_AST_DECL_NAME(n));
+    }
+  dok_tree_decl_add_location(tree, &DOK_AST_DECL_LOC(n), DOK_AST_DECL_ISDEF(n));
+  push(tree);
 }
 
 

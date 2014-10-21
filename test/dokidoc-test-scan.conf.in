@@ -2,6 +2,7 @@
 [DEFAULT]
 
 filter = @top_builddir@/src/dokidoc-filter/dokidoc-filter
+tmpldir = @top_srcdir@/test/tmpl
 
 source_bases = @top_srcdir@/test
 sources = @top_srcdir@/test/source1.h

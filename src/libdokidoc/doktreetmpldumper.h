@@ -9,7 +9,7 @@
 
 
 
-DokVisitor *dok_tree_tmpl_dumper_new ( void );
+DokVisitor *dok_tree_tmpl_dumper_new ( GHashTable *tmplmap );
 
 
 

@@ -9,8 +9,7 @@
 
 
 
-DokVisitor *dok_ast_processor_new ( void );
-DokTree *dok_ast_processor_get_tree ( DokVisitor *processor );
+DokVisitor *dok_ast_processor_new ( DokTree *tree );
 
 
 

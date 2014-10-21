@@ -213,6 +213,16 @@ gboolean dok_ast_type_isa ( DokASTNodeType type1,
 
 
 
+/* dok_ast_type_parent:
+ */
+DokASTNodeType dok_ast_type_parent ( DokASTNodeType type )
+{
+  TypeNode *node = type_lookup(type);
+  return node->parent ? node->parent->type : 0;
+}
+
+
+
 /* dok_ast_cast:
  */
 gpointer dok_ast_cast ( gpointer node,
@@ -409,9 +419,10 @@ DokAST *dok_ast_keyword_new ( gint token,
 
 /* dok_ast_namespace_new:
  */
-DokAST *dok_ast_namespace_new ( void )
+DokAST *dok_ast_namespace_new ( DokAST *ident )
 {
   DokAST *node = dok_ast_new(DOK_AST_NAMESPACE);
+  DOK_AST_DECL(node)->ident = ident;
   return node;
 }
 

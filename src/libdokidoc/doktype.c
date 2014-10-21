@@ -116,6 +116,16 @@ gboolean dok_type_isa ( DokType type1,
 
 
 
+/* dok_type_get_parent:
+ */
+DokType dok_type_get_parent ( DokType type )
+{
+  TypeNode *node = type_lookup(type);
+  return node->parent ? node->parent->type : 0;
+}
+
+
+
 /* dok_type_instance_new:
  */
 DokTypeInstance *dok_type_instance_new ( DokType type )

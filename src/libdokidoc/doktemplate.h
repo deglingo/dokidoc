@@ -12,13 +12,19 @@
  */
 typedef struct _DokTemplate
 {
-  int dummy;
+  gchar *path;
+  GPtrArray *nodes;
 }
   DokTemplate;
 
 
 
 DokTemplate *dok_template_new ( const gchar *tmplfile );
+void dok_template_add_node ( DokTemplate *tmpl,
+                             const gchar *type,
+                             const gchar *fqname );
+void dok_template_dump ( DokTemplate *tmpl,
+                         FILE *f );
 
 
 

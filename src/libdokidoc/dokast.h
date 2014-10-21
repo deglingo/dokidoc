@@ -251,6 +251,7 @@ void _dok_ast_init ( void );
 
 gboolean dok_ast_type_isa ( DokASTNodeType type1,
                             DokASTNodeType type2 );
+DokASTNodeType dok_ast_type_parent ( DokASTNodeType type );
 gpointer dok_ast_cast ( gpointer node,
                         DokASTNodeType type );
 gboolean dok_ast_check ( gpointer node,
@@ -298,7 +299,7 @@ DokAST *dok_ast_keyword_new ( gint token,
 
 #define DOK_AST_NAMESPACE_DECLS(n) (DOK_AST_NAMESPACE(n)->decls)
 
-DokAST *dok_ast_namespace_new ( void );
+DokAST *dok_ast_namespace_new ( DokAST *ident );
 void dok_ast_namespace_add_decls ( DokAST *namespace,
                                    DokAST *decls );
 
@@ -334,6 +335,8 @@ DokAST *dok_ast_func_declarator_new ( DokAST *target );
 #define DOK_AST_DECL_IDENT(n) (DOK_AST_DECL(n)->ident)
 #define DOK_AST_DECL_NAME(n) (DOK_AST_DECL_IDENT(n) ? DOK_AST_IDENT_NAME(DOK_AST_DECL_IDENT(n)) : "??")
 #define DOK_AST_DECL_LOC(n) (DOK_AST_DECL(n)->loc)
+/* [TODO] */
+#define DOK_AST_DECL_ISDEF(n) (TRUE)
 
 DokAST *dok_ast_decl_new ( DokASTNodeType type,
                            DokAST *type_spec,

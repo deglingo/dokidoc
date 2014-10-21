@@ -23,7 +23,7 @@ typedef struct _DokVisitorClass
 
   gpointer (* get_node_type) ( gpointer node );
 
-  gpointer (* get_node_type_parent) ( gpointer type );  
+  gpointer (* get_parent_type) ( gpointer type );
 
   DokVisitorFunc accept_default;
 

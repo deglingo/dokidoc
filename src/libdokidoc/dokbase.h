@@ -27,6 +27,17 @@ typedef struct _DokLocation
 
 void libdokidoc_init ( void );
 
+gsize g_printf_string_upper_boundf ( const gchar *format,
+                                     ... )
+  G_GNUC_PRINTF(1, 2);
+
+#define DOK_APRINTF(dest, format, v...) do {    \
+    gsize _dok_aprintf_size =                   \
+      g_printf_string_upper_boundf(format, v);  \
+    *dest = g_alloca(_dok_aprintf_size+1);      \
+    sprintf(*dest, format, v);                  \
+  } while (0)
+
 
 
 #endif

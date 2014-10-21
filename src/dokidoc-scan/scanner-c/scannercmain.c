@@ -52,7 +52,7 @@ static DokScanner *_scanner_new ( void )
 {
   DokScannerC *scanner;
   scanner = g_new0(DokScannerC, 1);
-  scanner->namespace = dok_ast_namespace_new();
+  scanner->namespace = dok_ast_namespace_new(dok_ast_ident_new(""));
   return (DokScanner *) scanner;
 }
 

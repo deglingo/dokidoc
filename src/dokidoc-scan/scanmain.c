@@ -30,32 +30,48 @@ static GOptionContext *get_option_context ( void )
 
 
 
+/* _process_scan:
+ */
+static DokAST *_process_scan ( DokConfig *config,
+                               DokScannerClass *cls,
+                               DokSourceFile *file )
+{
+  DokScanner *scanner;
+  DokAST *ast;
+  GError *error = NULL;
+  CL_DEBUG("scanning file: '%s'", file->fullpath);
+  scanner = dok_scanner_new(cls);
+  if (!(ast = dok_scanner_process(scanner, file->fullpath, &error)))
+    CL_ERROR("process error: %s", error->message);
+  /* debug dump */
+  {
+    DokVisitor *dumper = dok_ast_dumper_new(stderr);
+    CL_DEBUG("AST DUMP:");
+    dok_visitor_visit(dumper, ast);
+  }
+  return ast;
+}
+
+
+
 /* _process_file:
  */
 static void _process_file ( DokConfig *config,
                             DokScannerClass *cls,
                             DokSourceFile *file )
 {
-  DokScanner *scanner;
-  DokVisitor *visitor;
   DokAST *ast;
-  GError *error = NULL;
+  DokTree *tree;
+  DokVisitor *visitor;
   CL_DEBUG("pocessing file: '%s' (%s)", file->basepath, file->fullpath);
-  scanner = dok_scanner_new(cls);
-  if (!(ast = dok_scanner_process(scanner, file->fullpath, &error)))
-    CL_ERROR("process error: %s", error->message);
-  /* dump */
-  {
-    DokVisitor *dumper = dok_ast_dumper_new(stderr);
-    CL_DEBUG("AST DUMP:");
-    dok_visitor_visit(dumper, ast);
-  }
-  /* process */
+  ast = _process_scan(config, cls, file);
+  /* convert AST -> DokTree */
   CL_DEBUG("AST PROCESS...");
-  visitor = dok_ast_processor_new();
+  tree = dok_tree_root_new();
+  dok_tree_file_new(tree, file->fullpath);
+  visitor = dok_ast_processor_new(tree);
   dok_visitor_visit(visitor, ast);
   {
-    DokTree *tree = dok_ast_processor_get_tree(visitor);
     DokVisitor *tree_dumper = dok_tree_dumper_new(stderr);
     CL_DEBUG("TREE DUMP:");
     dok_visitor_visit(tree_dumper, tree);
@@ -64,7 +80,6 @@ static void _process_file ( DokConfig *config,
     xmlNodePtr xmlnode;
     xmlDocPtr xmldoc;
     FILE *f;
-    DokTree *tree = dok_ast_processor_get_tree(visitor);
     DokVisitor *xmldumper = dok_tree_xml_dumper_new();
     dok_visitor_visit(xmldumper, tree);
     xmlnode = dok_tree_xml_dumper_get_root(xmldumper);
