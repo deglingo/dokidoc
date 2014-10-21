@@ -9,6 +9,7 @@ TMPLDIR="$TOP_SRCDIR/test/tmpl"
 #DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/.libs/lt-dokidoc-scan"
 DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
 DOKIDOC_UPDATE="$TOP_BUILDDIR/src/dokidoc-update/dokidoc-update"
+DOKIDOC_SGML="$TOP_BUILDDIR/src/dokidoc-sgml/dokidoc-sgml"
 
 export G_DEBUG='gc-friendly'
 export G_SLICE='all'
@@ -34,5 +35,7 @@ export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
 test -d "$TMPLDIR" || mkdir -vp "$TMPLDIR"
 
 "$DOKIDOC_UPDATE" dokidoc-test-scan.conf || exit 1
+
+"$DOKIDOC_SGML" dokidoc-test-scan.conf || exit 1
 
 # "$DOKIDOC_UPDATE" -i source1.xml

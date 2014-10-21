@@ -37,6 +37,7 @@ AC_CONFIG_FILES([ \
   src/dokidoc-scan/scanner-c/Makefile \
   src/dokidoc-update/Makefile \
   src/dokidoc-filter/Makefile \
+  src/dokidoc-sgml/Makefile \
   tools/Makefile \
   test/Makefile \
 ])
