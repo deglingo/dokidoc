@@ -1,0 +1,72 @@
+# 1 "dokidoc.dot.in"
+# 1 "<command-line>"
+# 1 "dokidoc.dot.in"
+# 9 "dokidoc.dot.in"
+digraph G
+{
+
+
+
+    {
+        rank = same;
+        node[shape=ellipse, style=filled, color="chartreuse"];
+        sources;
+        layout;
+        tmpl;
+    }
+
+
+    {
+        node[shape=box, style=filled, color="cyan"];
+        cscan;
+        {
+            rank = same;
+            update_templates[label="update-templates"];
+            filter[label="filter"];
+        }
+        mksgml;
+        mkhtml;
+        mkpdf;
+        mkany[label="mk*"];
+    }
+
+
+    {
+        node[shape=ellipse, style=filled, color="yellow"];
+        xml[shape=ellipse];
+        sgml[shape=ellipse];
+    }
+
+
+    {
+        rank = same;
+        node[shape=ellipse, style=filled, color="limegreen"];
+        html[shape=ellipse];
+        pdf[shape=ellipse];
+        any[shape=ellipse, label="*"];
+    }
+
+
+    sources -> cscan;
+    cscan -> xml;
+
+    xml -> update_templates;
+    update_templates -> filter;
+    filter -> update_templates;
+    filter -> tmpl;
+    tmpl ->filter;
+
+    xml -> mksgml;
+    layout -> mksgml;
+    filter -> mksgml;
+    mksgml -> sgml;
+
+    sgml -> mkhtml;
+    mkhtml -> html;
+
+    sgml -> mkpdf;
+    mkpdf -> pdf;
+
+    sgml -> mkany;
+    mkany -> any;
+}
