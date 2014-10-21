@@ -27,6 +27,8 @@ typedef struct _DokLocation
 
 void libdokidoc_init ( void );
 
+void dok_mkdir ( const gchar *dirname );
+
 gsize g_printf_string_upper_boundf ( const gchar *format,
                                      ... )
   G_GNUC_PRINTF(1, 2);

@@ -23,3 +23,8 @@ listdirs:
 		printf "$$fmt" 'pkgdatadir' "$(pkgdatadir)"; \
 		printf '====================================\n'; \
 	)
+
+.PHONY: docs-html
+
+docs-html:
+	cd test && $(MAKE) $(AM_MAKEFLAGS) docs-html

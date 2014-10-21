@@ -1,0 +1,17 @@
+DOKIDOCIZE = @DOKIDOCIZE@
+top_srcdir = @top_srcdir@
+srcdir = @srcdir@
+top_builddir = @top_builddir@
+subdir = test/docs
+.PHONY: all
+all: 
+.PHONY: check
+check: 
+.PHONY: install
+install: 
+Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
+	cd $(top_builddir) && ./config.status --file=$(subdir)/Makefile
+$(srcdir)/Makefile.in: dokidoc.conf
+	$(DOKIDOCIZE) -U -s $(top_srcdir) -c dokidoc.conf $(subdir)
+dokidoc.conf: $(srcdir)/dokidoc.conf.in $(top_builddir)/config.status
+	cd $(top_builddir) && ./config.status --file=$(subdir)/dokidoc.conf

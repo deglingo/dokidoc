@@ -27,6 +27,12 @@ AC_PATH_PROG([XML_CONFIG], [xml2-config])
 LIBXML_CFLAGS=`$XML_CONFIG --cflags`
 LIBXML_LIBS=`$XML_CONFIG --libs`
 
+#
+AC_SUBST([DOKIDOCIZE], ['${top_builddir}/tools/dokidocize'])
+AC_SUBST([DOKIDOC_SCAN], ['${top_builddir}/src/dokidoc-scan/dokidoc-scan'])
+AC_SUBST([DOKIDOC_UPDATE], ['${top_builddir}/src/dokidoc-update/dokidoc-update'])
+AC_SUBST([DOKIDOC_SGML], ['${top_builddir}/src/dokidoc-sgml/dokidoc-sgml'])
+
 AC_CONFIG_FILES([ \
   Makefile \
   src/Makefile \
@@ -40,9 +46,11 @@ AC_CONFIG_FILES([ \
   src/dokidoc-sgml/Makefile \
   tools/Makefile \
   test/Makefile \
+  test/src/Makefile \
+  test/docs/Makefile \
 ])
 AC_CONFIG_FILES([tools/dokidocize], [chmod +x tools/dokidocize])
 AC_CONFIG_FILES([src/dokidoc/dokidoc], [chmod +x src/dokidoc/dokidoc])
-AC_CONFIG_FILES([test/dokidoc-test-scan], [chmod +x test/dokidoc-test-scan])
-AC_CONFIG_FILES([test/dokidoc-test-scan.conf])
+AC_CONFIG_FILES([test/dokidoc-test], [chmod +x test/dokidoc-test])
+AC_CONFIG_FILES([test/docs/dokidoc.conf])
 AC_OUTPUT

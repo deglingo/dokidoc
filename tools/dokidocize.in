@@ -3,6 +3,9 @@
 
 import sys, os, getopt, configparser
 
+# [FIXME]
+XSL_HTML = "/usr/share/xml/docbook/stylesheet/docbook-xsl-ns/html/docbook.xsl"
+
 # trace:
 def trace (msg) :
     sys.stderr.write('dokidocize: %s\n' % msg)
@@ -24,6 +27,7 @@ class Config :
             parser.read_file(f, fname)
         #
         self.sources = (s.strip() for s in parser['DEFAULT']['sources'].split(','))
+        self.tmpldir = parser['DEFAULT']['tmpldir']
 
 # Writer:
 class Writer :
@@ -176,13 +180,23 @@ def generate_makefile (cfg) :
     trace("generating makefile: '%s'" % makefile)
     w = _generate_base_makefile(cfg)
     defs = w.section('defs')
-    defs.subst('DOKIDOC')
+    defs.subst('DOKIDOC_SCAN')
+    defs.subst('DOKIDOC_UPDATE')
+    defs.subst('DOKIDOC_SGML')
     s = w.section('rules')
-    s.rule('dokidoc', 'dokidoc-xml1.stamp-h', phony=True)
-    s.rule('dokidoc-xml1.stamp-h',
-           cfg.sources,
-           ('$(DOKIDOC) --scan dokidoc.conf',
+    s.rule('docs-html', 'docs-html.stamp-h', phony=True)
+    s.rule('docs-html.stamp-h',
+           'docs-sgml.stamp-h',
+           ('xalan -in sgml/book.sgml -xsl %s -out dokidoc.html' % XSL_HTML,
             'echo >$@'))
+    s.rule('docs-sgml.stamp-h',
+           '%s/*.tmpl' % cfg.tmpldir,
+           '$(DOKIDOC_SGML) dokidoc.conf')
+    s.rule('update-templates',
+           None,
+           ('$(DOKIDOC_SCAN) dokidoc.conf',
+            '$(DOKIDOC_UPDATE) dokidoc.conf'),
+           phony=True)
     # output
     # trace('OUTPUT:')
     # w.dump(sys.stderr)

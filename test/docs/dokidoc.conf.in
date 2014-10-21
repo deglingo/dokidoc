@@ -1,0 +1,8 @@
+#
+[DEFAULT]
+
+filter = @top_builddir@/src/dokidoc-filter/dokidoc-filter
+tmpldir = @top_srcdir@/test/docs/tmpl
+
+source_bases = @top_srcdir@/test/src
+sources = @top_srcdir@/test/src/*.h

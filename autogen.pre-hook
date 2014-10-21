@@ -1,0 +1,3 @@
+# -*- shell-script -*-
+
+cp -vf test/docs/Makefile-dummy.in test/docs/Makefile.in

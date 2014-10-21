@@ -47,6 +47,7 @@ static void process ( DokConfig *config )
     {
       DokTemplate *tmpl = l->data;
       FILE *f;
+      dok_mkdir(config->tmpldir);
       if (!(f = fopen(tmpl->path, "w")))
         CL_ERROR("could not open file '%s' : %s", tmpl->path, strerror(errno));
       dok_template_dump(tmpl, f);

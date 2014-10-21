@@ -13,7 +13,7 @@
  */
 static void process ( DokConfig *config )
 {
-  gchar *dest = "sgml/dokidoc.sgml";
+  gchar *dest = "sgml/book.sgml";
   FILE *f;
   xmlNodePtr root, title, chap;
   xmlDocPtr doc;
@@ -33,6 +33,8 @@ static void process ( DokConfig *config )
   doc = xmlNewDoc(BAD_CAST "1.0");
   xmlDocSetRootElement(doc, root);
   xmlDocFormatDump(stderr, doc, 1);
+  /* [FIXME] */
+  dok_mkdir("./sgml");
   if (!(f = fopen(dest, "w")))
     CL_ERROR("could not open '%s' : %s", dest, strerror(errno));
   xmlDocFormatDump(f, doc, 1);

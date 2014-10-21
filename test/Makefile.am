@@ -1,7 +1,7 @@
 #
 
-check_DATA = dokidoc-test-scan.conf
+SUBDIRS = src docs
 
-check_SCRIPTS = dokidoc-test-scan
+check_SCRIPTS = dokidoc-test
 
-TESTS = dokidoc-test-scan
+TESTS = dokidoc-test
