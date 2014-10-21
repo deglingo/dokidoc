@@ -552,8 +552,9 @@ static void start_location ( Loader *loader,
                      COLLECT_FLAG_BOOL, "isdef", &isdef,
                      0))
     CL_ERROR("[TODO]");
-  file = dok_tree_root_get_decl_by_id(loader->tree, fileid);
+  file = g_hash_table_lookup(loader->idmap, GUINT_TO_POINTER(fileid));
   ASSERT(file);
+  ASSERT(DOK_IS_TREE_FILE(file));
   loc = dok_tree_loc_new(file, lineno, isdef);
   dok_tree_decl_add_location2(loader->item, loc);
 }
