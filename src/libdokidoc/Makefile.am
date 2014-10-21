@@ -15,6 +15,7 @@ include_HEADERS = \
 libdokidocinclude_HEADERS = \
 	dokbase.h \
 	dokconfig.h \
+	dokxmlwriter.h \
 	doktype.h \
 	dokast.h \
 	dokvisitor.h \
@@ -33,6 +34,7 @@ libdokidocinclude_HEADERS = \
 libdokidoc_la_SOURCES = \
 	dokbase.c \
 	dokconfig.c \
+	dokxmlwriter.c \
 	doktype.c \
 	dokast.c \
 	dokvisitor.c \

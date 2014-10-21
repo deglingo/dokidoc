@@ -5,6 +5,7 @@ TOP_SRCDIR='@abs_top_srcdir@'
 TOP_BUILDDIR='@abs_top_builddir@'
 
 TMPLDIR="$TOP_SRCDIR/test/tmpl"
+SGMLDIR='sgml'
 
 #DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/.libs/lt-dokidoc-scan"
 DOKIDOC_SCAN="$TOP_BUILDDIR/src/dokidoc-scan/dokidoc-scan"
@@ -33,9 +34,12 @@ export DOKIDOC_SCANNERSDIR="$TOP_BUILDDIR/src/dokidoc-scan/scanner-c"
 
 # [FIXME]
 test -d "$TMPLDIR" || mkdir -vp "$TMPLDIR"
+test -d "$SGMLDIR" || mkdir -vp "$SGMLDIR"
 
 "$DOKIDOC_UPDATE" dokidoc-test-scan.conf || exit 1
 
 "$DOKIDOC_SGML" dokidoc-test-scan.conf || exit 1
 
 # "$DOKIDOC_UPDATE" -i source1.xml
+
+xalan -in sgml/dokidoc.sgml -xsl /usr/share/xml/docbook/stylesheet/docbook-xsl/html/docbook.xsl -out dokidoc.html || exit 1

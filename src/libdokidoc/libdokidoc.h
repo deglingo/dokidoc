@@ -9,6 +9,8 @@
 
 #include "libdokidoc/dokconfig.h"
 
+#include "libdokidoc/dokxmlwriter.h"
+
 #include "libdokidoc/dokast.h"
 
 #include "libdokidoc/dokastvisitor.h"
